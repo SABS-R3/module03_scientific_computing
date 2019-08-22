@@ -1,0 +1,49 @@
+\documentclass[a4paper]{article}
+
+\input{common.tex}
+
+\begin{document}
+
+\section*{Exercises: Finite Differences and PDEs}
+
+\vspace{0,75cm}
+
+
+\subsection*{Exercise 1 - Laplace equation}
+
+- construct matrix for laplace and solve
+- compare dense versus sparse representation
+
+\subsection*{Exercise 1 - time integration}
+
+- heat eq (explicit time)
+- biharmonic eq (implicit time)
+- kuramoto-sivashinsky (combination - IMEX)
+- method of lines - scipy odeint
+
+\subsection*{Exercise 1 - Perona–Malik Image denoising}
+
+- load image
+- try regular diffusion to reduce noise
+- discretise and solve perona-malik equation to preserve edges
+
+ 
+\begin{solution}
+\begin{python}
+pi = 3.14159265358979312
+
+my_pi = 1.
+
+for i in range(1, 100000):
+    my_pi *= 4 * i ** 2 / (4 * i ** 2 - 1.)
+
+my_pi *= 2
+
+print(pi)
+print(my_pi)
+print(abs(pi - my_pi))
+\end{python}
+\end{solution}
+
+
+\end{document}

@@ -1,0 +1,60 @@
+\usepackage{xltxtra}
+\usepackage{polyglossia}
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{versions}
+\usepackage{hyperref}
+
+%\includeversion{solution}
+\excludeversion{solution}
+
+\geometry{a4paper,left=15mm,right=15mm,top=20mm,bottom=20mm}
+\pagestyle{fancy}
+\chead{UNIQ+ Summer School - Scientific Python}
+\rhead{\today}
+\cfoot{\thepage}
+
+\setlength{\headheight}{23pt}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.0in}
+
+
+\usepackage{listings} %iclude code in your document
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+\lstloadlanguages{Matlab} %use listings with Matlab for Pseudocode
+\lstnewenvironment{pseudocode}[1][]
+{\lstset{
+  language=Matlab,
+  basicstyle=\scriptsize, 
+  keywordstyle=\color{blue},
+  xleftmargin=.04\textwidth,#1}}
+{}
+\lstnewenvironment{python}[1][]
+{\lstset{
+  language=Python,
+  basicstyle=\scriptsize, 
+  keywordstyle=\color{deepblue},
+  otherkeywords={self},             % Add keywords here
+  keywordstyle=\color{deepblue},
+  emph={MyClass,__init__,__str__},          % Custom highlighting
+  emphstyle=\color{deepred},    % Custom highlighting style
+  stringstyle=\color{deepgreen},
+  xleftmargin=.04\textwidth,#1}}
+{}
+\newcommand{\cf}[1]{\lstinline
+[
+  language=Python,
+  keywordstyle=\color{deepblue},
+  otherkeywords={self},             % Add keywords here
+  keywordstyle=\color{deepblue},
+  emph={MyClass,__init__,__str__},          % Custom highlighting
+  emphstyle=\color{deepred},    % Custom highlighting style
+  stringstyle=\color{deepgreen}
+]
+{#1}}
+
