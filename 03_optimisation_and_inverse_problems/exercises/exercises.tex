@@ -1,0 +1,95 @@
+\documentclass[a4paper]{article}
+
+\input{common.tex}
+
+\begin{document}
+
+\section*{Exercises: Optimisation and Inverse Modelling}
+
+\vspace{0,75cm}
+
+
+\subsection*{Exercise 1 - Calculating derivatives}
+
+(a) write rosenbrock function in sympy
+(b) code up numerical differentiation of a function (rosenbrock) and compare with
+symbolic result (using sympy.diff)
+(c) use forward and reverse mode autodiff (library or get them to code up?), vary the
+number of inputs and time it, along with numerical and symbolic diff
+
+Aim: students have an understanding of symbolic, numerical, and auto diff and the
+comparitive accuracies and time-to-evaluate
+
+\subsection*{Exercise 2 - Optimisation}
+
+(a) Code up a couple of simple optimisation algs in 1D:
+  - bisection 
+  - gradient descent
+  - stochastic gradient descent
+  - newtons-rhapson
+  - test and visualise the operation on x**2 (convex) and x**2 + np.exp(-5*(x - .5)**2
+  (non-convex functions)
+  - compare against library functions (take one step at a time)
+
+(b) Use a range of library optimisation algs from these classes of methodso:
+  - Simplex (Nelder–Mead)
+  - Gradient (Conjugate Gradient, L-BFGS-B)
+  - Quasi-Newton (BFGS)
+  - Newton (Newton-CG)
+  - Global optimisation (CMA-ES)
+
+Apply to the following (2D) problems
+  a) an easy convex function
+  b) non-convex (Rosenbrock function?)
+  c) multi-modal (bunch of gaussians?)
+
+Aim: Get the students to understand the differences between the main classes of
+optimisation algorithms and their performance on different types of functions
+
+
+\subsection*{Exercise 3 - Model Fitting}
+
+- Code up a polynomial regression routine for an arbitrary function, takes in the number
+of regressors (n)
+- Use on a noisy dataset
+  - Visualise fitting results versus n
+  - evaluate model performance using residuals (bad) + Leave-one-out cross validation
+  (good)
+- Improve the result for high n by ridge regression
+
+Aim: Students are aware of the dangers of over-fitting complex models and know about
+techniques to reduce this (LOOCV, regularisation or priors)
+
+
+\subsection*{Exercise 4 - ODE Model Fitting}
+
+if you have time:
+  (a) code up pure-python ode integrator. code up forward and adjoint sensitivity calculating using ode integrator, compare
+      with forward and reverse-mode automatic differentiation (use logistic model as the ode)
+else:
+  (a) use scipy odeint and autograd to do the same
+
+(b) fit an ode model (logistic) to noisy "data" using CMA-ES, CG and Quasi-Newton
+
+Aim: students understand how to calculate sensitivities of and ode model and use these
+for model fitting
+
+\begin{solution}
+\begin{python}
+pi = 3.14159265358979312
+
+my_pi = 1.
+
+for i in range(1, 100000):
+    my_pi *= 4 * i ** 2 / (4 * i ** 2 - 1.)
+
+my_pi *= 2
+
+print(pi)
+print(my_pi)
+print(abs(pi - my_pi))
+\end{python}
+\end{solution}
+
+
+\end{document}
