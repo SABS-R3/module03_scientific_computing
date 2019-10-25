@@ -1,5 +1,7 @@
 \documentclass[a4paper]{article}
 
+\usepackage{enumitem}
+
 \input{common.tex}
 
 \begin{document}
@@ -11,85 +13,92 @@
 
 \subsection*{Exercise 1 - Calculating derivatives}
 
-(a) write rosenbrock function in sympy
-(b) code up numerical differentiation of a function (rosenbrock) and compare with
-symbolic result (using sympy.diff)
-(c) use forward and reverse mode autodiff (library or get them to code up?), vary the
-number of inputs and time it, along with numerical and symbolic diff
+\begin{enumerate}[label=\Alph*]
+\item Implement the 2D [Rosenbrock
+function](https://en.wikipedia.org/wiki/Rosenbrock_function) both as a normal Python
+function, and as a mathematical expression using Sympy.
 
-Aim: students have an understanding of symbolic, numerical, and auto diff and the
-comparitive accuracies and time-to-evaluate
+\item Calculate the numerical derivative of the rosenbrock function using a central
+  finite difference scheme and compare with the symbolic result using `sympy.diff`. Plot
+    the error versus step size $h$ and check if it scales by the expected rate of
+    $\mathcal{O}(h^2)$. If not, why?
+
+\item Manually write down (in Python code) the required operations to calculate the
+    derivative of the Rosenbrock function using forward mode automatic differentiation.
+    Check that the calculated derivative is correct to working precision. Do the same
+    for reverse mode automatic differentiation. 
+\end{enumerate}
 
 \subsection*{Exercise 2 - Optimisation}
 
-(a) Code up a couple of simple optimisation algs in 1D:
-  - bisection 
-  - gradient descent
-  - stochastic gradient descent
-  - newtons-rhapson
-  - test and visualise the operation on x**2 (convex) and x**2 + np.exp(-5*(x - .5)**2
-  (non-convex functions)
-  - compare against library functions (take one step at a time)
 
-(b) Use a range of library optimisation algs from these classes of methodso:
-  - Simplex (Nelder–Mead)
-  - Gradient (Conjugate Gradient, L-BFGS-B)
-  - Quasi-Newton (BFGS)
-  - Newton (Newton-CG)
-  - Global optimisation (CMA-ES)
-
-Apply to the following (2D) problems
-  a) an easy convex function
-  b) non-convex (Rosenbrock function?)
-  c) multi-modal (bunch of gaussians?)
-
-Aim: Get the students to understand the differences between the main classes of
-optimisation algorithms and their performance on different types of functions
-
+\begin{enumerate}[label=\Alph*]
+  \item Implement a simple 2D quadratic function $f(x, y) = x^2 + y^2$, the 2D [Rosenbrock
+    function](https://en.wikipedia.org/wiki/Rosenbrock_function), and the 2D [Rastrigin
+    function](https://en.wikipedia.org/wiki/Rastrigin_function), and visualise these
+    functions over the domain $-5 < x < 5$ and $-5 < y < 5$
+  \item Use [Scipy](https://docs.scipy.org/doc/scipy/reference/optimize.html) to
+    minimise each of these functions, starting at $x = y = 2.5$, using the following methods:
+        \begin{itemize}
+        \item Nelder-Mead Simplex
+        \item Conjugate Gradient
+        \item BFGS Quasi-Newton
+        \item Newton-CG
+        \item SHG Global Optimisation
+        \end{itemize}
+        In each case perform the optimisation with and without a jacobian. To calculate
+        the jacobian use automatic differentiation via the [autograd](https://github.com/HIPS/autograd) library.
+        
+    \item Plot the results for the previous question by plotting the parameter values at
+      each iteration of the algorithm overlayed on the visualisation of the function to
+      be minimised, and label the figure with the number of iterations and function/jacobian/hessian
+      evaluations. What can you say about the performance of each algorithm for each
+      function? What are the characteristics of each function that make it
+      difficult/easy for the optimisation method?
+\end{enumerate}
+      
 
 \subsection*{Exercise 3 - Model Fitting}
 
-- Code up a polynomial regression routine for an arbitrary function, takes in the number
-of regressors (n)
-- Use on a noisy dataset
-  - Visualise fitting results versus n
-  - evaluate model performance using residuals (bad) + Leave-one-out cross validation
-  (good)
-- Improve the result for high n by ridge regression
+\begin{enumerate}[label=\Alph*]
+  \item Generate fake data points by evaluating the function $f(x) = -2*x**3 +
+    3*x**2 + x + 1$ over $n=100$ points $x_i$ evenly spaced between $0 \le x \le 2$. Add
+    normally distributed noise to each function evaluation so that each data point $y_i$
+    is (independently) sampled using $y_i \sim f(x_i) + \mathcal{N}(0, 1)$.
 
-Aim: Students are aware of the dangers of over-fitting complex models and know about
-techniques to reduce this (LOOCV, regularisation or priors)
+  \item Implement a polynomial regression routine using an given number of regressors
+    $m$, and use it to fit to the fake data. Plot the fitted function so that you can
+    evaluate the fit by eye. Then calculate the residual, and the average
+    Leave-one-out cross validation error. Plot the residual and cross validation versus
+    $m$ to determine the ideal number of regressors $m$.
 
+\end{enumerate}
+    
 
 \subsection*{Exercise 4 - ODE Model Fitting}
 
-if you have time:
-  (a) code up pure-python ode integrator. code up forward and adjoint sensitivity calculating using ode integrator, compare
-      with forward and reverse-mode automatic differentiation (use logistic model as the ode)
-else:
-  (a) use scipy odeint and autograd to do the same
+\begin{enumerate}[label=\Alph*]
+    \item The logistic growth equation is given by
 
-(b) fit an ode model (logistic) to noisy "data" using CMA-ES, CG and Quasi-Newton
+      $$ \frac{dy}{dt} = r y (1 - y/k) $$
 
-Aim: students understand how to calculate sensitivities of and ode model and use these
-for model fitting
+      Solve this equation using $r = 10$, $k = 1$, and intial condition of $y(0) = p_0
+      = 1e-2$ using `scipy.integrate.odeint`, and compare with the exact solution
+      given by
 
-\begin{solution}
-\begin{python}
-pi = 3.14159265358979312
+      $$ y(t) = \frac{k}{1 + (k/p_0 - 1) \exp(-r t)} $$
 
-my_pi = 1.
+  \item If $\mathbf{\omega} = [r, k] $ is the parameters and $f(\omega, y)$ is the RHS
+    of the ODE, calculate $\partial f/ \partial \omega$ and $\partial f/ \partial y$,
+    and use forward sensitivity analysis to calculate the sensitivities $\partial y(t) /
+    \partial r$ and $\partial y(t) / \partial k$. Compare this to the exact solution for
+    the sensitivities (i.e. calculate the derivative of the the exact solution above)
 
-for i in range(1, 100000):
-    my_pi *= 4 * i ** 2 / (4 * i ** 2 - 1.)
+  \item Generate some fake data using $r = 10$, $k = 1$, and $p_0 = 1e-2$, using
+    independent normally distributed measurement noise with a variance of 0.1.  Attempt
+    to recover the true parameters $r,k$ using an initial guess of $r=1$, $k=5$ using
+    the Nelder-Mead, BFGS, and Newton-CG optimisation methods. 
 
-my_pi *= 2
-
-print(pi)
-print(my_pi)
-print(abs(pi - my_pi))
-\end{python}
-\end{solution}
-
+\end{enumerate}
 
 \end{document}
