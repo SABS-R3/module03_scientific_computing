@@ -1,0 +1,1100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0062)https://users.fmrib.ox.ac.uk/~saad/ONBI/fourier_practical.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link rel="stylesheet" type="text/css" href="./ONBI - Signal and Image Processing Practical_files/fsl.css">
+<script type="text/javascript" src="./ONBI - Signal and Image Processing Practical_files/showhide.js"></script>
+<title>ONBI - Signal and Image Processing Practical</title>
+</head>
+<body>
+<div id="practical">
+<h1 class="centred">ONBI - Signal and Image Processing Practical</h1>
+
+<hr>
+
+<h2>Overview</h2>
+<p>This practical requires Matlab. Go through the instructions and execute the listed
+  commands in a Matlab command window (you can copy-paste). Don't click on
+  the "answers" links until you have thought hard about the
+  questions. Raise your hand if you need help, but perhaps try first
+  the "help" command in Matlab if you are unsure about Matlab syntax issues.
+</p><h3>Contents:</h3>
+<dl class="contents">
+<dt><a href="https://users.fmrib.ox.ac.uk/~saad/ONBI/fourier_practical.html#fourier">Fourier analysis</a></dt>
+<dd>Learn basics of FFT in 1D (signals) and 2D (images)</dd>
+<dt><a href="https://users.fmrib.ox.ac.uk/~saad/ONBI/fourier_practical.html#filtering">Filtering</a></dt>
+<dd>Learn to implement linear filters using convolution</dd>
+<dt><a href="https://users.fmrib.ox.ac.uk/~saad/ONBI/fourier_practical.html#imaging">Image reconstruction</a></dt>
+<dd>Fourier/Radon transforms and image reconstruction</dd>
+</dl>
+<hr>
+<h2><a name="fourier"> Fourier analysis </a></h2>
+
+<p>To start with, let us create some simple 1D signals and examine
+  their Fourier transforms. In this first example, we will check the
+  frequency content of a simple periodic signal. 
+</p><p>Generate a cosine signal with given magnitude, frequency, sampling
+  rate, and duration:
+
+</p><pre>  mag  = 2;     % magnitude (arbitrary units)
+  freq = 5;     % frequency in Hz
+  samp = 100;   % sampling rate in Hz
+
+  t        = 0:1/samp:1;  % time (1s of data)
+  t        = t(1:end-1);  % remove last time point
+  N        = length(t);   % store the number of time points
+
+  x = mag*cos(2*pi*freq*t);    % the signal equation
+  figure
+  plot(t,x,'.-');
+
+</pre>
+<p>If you run the code above, you can see a nice cosine function. Make
+  sure you understand the distinction between the sampling rate (in
+  this case number of data points per second) and the frequency of the
+  signal (number of cycles per second). In this case, since we have
+  generated a signal that has a duration of 1 second, you should be
+  able to easily count the number of cycles per second :)
+
+</p><p>You may wonder why I removed the last time point? This is simply
+  because when doing an FFT, matlab assumes that the
+  signal you give it is periodic, repeating itself indefinitely. So if
+  I want matlab to think the signal is a pure infinite cosine
+  function, I need to stop just before the next cycle. If you don't
+  understand this, don't worry, it's not important, just carry on..
+
+</p><p>Now, let us immediately look at the Fourier transform
+  of this signal.
+
+</p><pre>  y  = fft(x);             % do Fast Fourier Transform
+  f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+
+  figure
+  plot(f,abs(y),'.-');     % plotting the magnitude of the FFT
+
+</pre>
+<p>This plot is called a <b>powerspectrum</b>. The first peak coincides with the frequency of the cosine
+function (check this). The second peak is redundant (for mathematical
+reasons). Therefore, from now on we will only display the first half of
+the fourier transform:
+</p><pre>  figure
+  plot(f(1:N/2),abs(y(1:N/2)));  % plotting half of the fft results
+  xlabel('Freq (Hz)');           % labelling x-axis
+</pre>
+<p>Notice how the peak of the powerspectrum corresponds exactly to the
+  frequency of the original signal. Now what happens to the
+  powerspectrum when we:
+</p><ul>
+<li>Change the frequency of the signal?
+<span class="clickme" onclick="showIt(&#39;ans1&#39;)">Answer</span> 
+  <div id="ans1" class="answer" style="display: none"> 
+    This one is easy: the peak moves to the new frequency. But what
+    happens when the frequency is zero? In this case, the signal is
+    flat (constant) and the FFT gives a peak at zero.
+  </div> 
+</li><li>Change the magnitude of the signal?
+<span class="clickme" onclick="showIt(&#39;ans2&#39;)">Answer</span> 
+  <div id="ans2" class="answer" style="display: none"> 
+    <p>The magnitude of the peak also changes. In general, Parseval's theorem
+    tells us that the sum of squares of the signal equals the mean of
+    squares of its Fourier transform. You can verify this by
+    comparing:
+      </p><pre>	sum(x.^2)
+	mean(abs(y).^2)
+      </pre>
+    <p>Another important and interesting property is that the
+    zero-frequency value of the Fourier transform corresponds to the
+    sum of the original signal. You can verify this by adding a
+    constant to the cosine signal that you have generated:
+      </p><pre>	x2 = x+3;
+	y  = fft(x2);
+	figure, plot(f(1:N/2),abs(y(1:N/2)),'.-');
+      </pre>
+      <p>You can see that y(1)=sum(x2)=300.
+  </p></div> 
+
+</li><li>Change the phase of the signal?
+<span class="clickme" onclick="showIt(&#39;ans3&#39;)">Answer</span> 
+  <div id="ans3" class="answer" style="display: none"> 
+    <p>The peak of the powerspectrum does not move in this case:
+    </p><pre>      phase = 2*pi*10; 
+      x2    = mag*cos(2*pi*freq*t+phase);
+      y  = fft(x2);
+      figure, plot(f(1:N/2),abs(y(1:N/2)),'.-');      
+    </pre>
+      <p>However, in general the result of an FFT is a complex signal,
+      with both amplitude and phase. Whilst the amplitude of the FFT
+      does not change when we change the phase of the signal, the
+      phase of the FFT does. We will have a closer look at phase later
+      on in this practical.
+  </p></div> 
+</li><li>Change the sampling rate?
+<span class="clickme" onclick="showIt(&#39;ans4&#39;)">Answer</span> 
+  <div id="ans4" class="answer" style="display: none"> 
+    <p>The higher the sampling rate, the more samples there are in the
+    FFT. However, if the sampling rate falls below twice the frequency
+    of the signal, the powerspectrum begins to show weird behaviour
+    (the peak is no longer at the right place - try it!). This is
+    called aliasing, and is explained by the Nyquist theorem. We will
+    revisit aliasing further down.
+  </p></div> 
+</li></ul>
+
+<p>Now let's do the opposite to the above. Instead of creating a
+  signal and looking at its FFT, we are going to create an FFT and
+  look at its signal. We will use the inverse FFT function in matlab
+  (<code>ifft</code>). 
+</p><p>We will create two signals, one that is the magnitude and one that is the
+  phase, and we will look at the inverse fourier
+  transform of these:
+
+</p><pre>  mag = zeros(1,100);
+  mag(3)=1;        % spike in the magnitude at freq=3
+  mag(5)=.3;       % spike in the magnitude at freq=5
+
+  ph=zeros(1,100); % zero phase throughout
+
+  y = mag.*exp(1i*ph);  % the complex signal (fft of some real signal)
+  x = ifft(y);          % the inverse fft (x is in general complex too)
+  x = real(x);          % here we imagine that we can "measure" the real part of x
+
+  z = ifft(mag);        % here we just use the magnitude to do the ifft
+  z = real(z);
+
+  figure,hold on
+  plot(x,'.-r')   % plot the real part of the signal
+  plot(z,'.-b')   % plot the ifft of the magnitude
+</pre>
+<p>To clarify, in the above I've
+  used <code>y=mag.*exp(1i*ph)</code>. This is how you write a complex
+  number given its magnitude and phase (an alternative is to use the
+  real and imaginary parts). The notation <code>1i</code> is Matlab's
+  code for the famous imaginary number sqrt(-1).
+</p><p>Now try to change the phase of the signal. You can see that nothing
+  changes unless you modify the 3rd and 5th entry of the phase
+  signal (corresponding to the 3rd and 5th frequencies with non-zero
+  magnitude).
+</p><p>Play a bit with changing the magnitude and phase signals and look
+  at the result of the ifft. Compare the reconstructed signals with
+  and without the phase.
+
+</p><p>The Fourier transform is not only useful for simple periodic
+  signals. Next, examine the Fourier transform of the following
+  functions: exponential decay, delta-function, step function,
+  constant, mixtures of periodic signals, random noise, smooth random
+  noise. In playing with these FFTs, try to answer the following questions:
+
+</p><ul>
+<li> Exponential decay: how does the decay constant relate to the
+  shape of the FFT?
+<span class="clickme" onclick="showIt(&#39;ans5&#39;)">Answer</span> 
+  <div id="ans5" class="answer" style="display: none"> 
+    <p>An exponential decay with given decay rate:
+      </p><pre>	mag = 2;      % magnitude (arbitrary units)
+	dec = .3;     % decay rate (in seconds)
+	samp = 100;   % sampling rate in Hz
+
+	t        = 0:1/samp:1;  % time (1s of data)
+	t        = t(1:end-1);  % remove last time point
+	N        = length(t);   % store the number of time points
+
+	x = mag*exp(-t/dec);    % the signal equation
+	figure
+	plot(t,x,'.-');
+
+	y  = fft(x);           % do Fast Fourier Transform
+	f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+
+	figure
+	plot(f(1:N/2),abs(y(1:N/2)),'.-');  % plot powerspectrum
+
+      </pre>      
+    <p>Try changing the decay rate and notice an interesting fact: the
+    wider the original signal, the tighter its Fourier transform. This
+    is called the uncertainty principle (yes like Heisenberg's!). You
+    can localise the signal or its Fourier transform, but not both.
+  </p></div> 
+
+</li><li> Delta function: how does the shape of the FFT relate to the
+  location of the delta function? (hint: look at the phase as well as the
+  magnitude)
+<span class="clickme" onclick="showIt(&#39;ans6&#39;)">Answer</span> 
+  <div id="ans6" class="answer" style="display: none"> 
+    <p>The relevant parameter of a delta function is the location of
+    the peak. We call it t0 below:
+      </p><pre>	mag = 2;      % magnitude (arbitrary units)
+	t0  = .3;     % peak location (in seconds)
+	samp = 100;   % sampling rate in Hz
+
+	t        = 0:1/samp:1;  % time (1s of data)
+	t        = t(1:end-1);  % remove last time point
+	N        = length(t);   % store the number of time points
+
+	x                   = zeros(1,N);     % signal
+	x(1+round(samp*t0)) = mag;
+
+	figure
+	plot(t,x,'.-');
+
+	y  = fft(x);           % do Fast Fourier Transform
+	f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+
+	figure
+	plot(f(1:N/2),abs(y(1:N/2)),'.-');            % plot powerspectrum
+	figure
+	plot(f(1:N/2),unwrap(angle(y(1:N/2))),'.-');  % plot unwrapped phase of FFT
+
+      </pre>      
+    <p>The first thing to notice about the delta function is that the
+    powerspectrum is flat. This is an extreme case of the uncertainty
+    principle (see exponential function above): when the signal is
+    extremely localised, the fourier transform is flat. Remember that we have seen
+    the opposite earlier: when the signal is flat (constant), its FFT
+    is a peak at zero.
+    </p><p>Try changing the localisation of the peak and notice that the
+    powerspectrum doesn't change, but the phase of the FFT changes (we
+    unwrapped the phase because Matlab's FFT wraps it when it gets to
+    -pi and pi). 
+    </p><p>Changing the peak location, it looks like the phase map is
+    linear with a slope that decreases linearly with the location of
+    the peak. This is a mathematical result in Fourier analysis: a
+    translation in real space corresponds to a multiplication by a
+    phase ramp in Fourier space.
+  </p></div> 
+
+</li><li> Random noise: what happens to the FFT when we smooth random
+  noise?
+<span class="clickme" onclick="showIt(&#39;ans7&#39;)">Answer</span> 
+  <div id="ans7" class="answer" style="display: none"> 
+    <p>Let's start by generating some random noise and looking at the
+    FFT (let's not bother this time with units):
+      </p><pre>	x = randn(1,1000);
+	y = fft(x);
+	figure, plot(x)
+	figure, plot(abs(y(1:500)));
+      </pre>
+    <p>The powerspectrum is noisy, but flat. Now let's apply some
+    smoothing:
+      </p><pre>	x = randn(1,1000);
+	x = smooth(x,10);  % try changing the second entry
+	y = fft(x);
+	figure, plot(x)
+	figure, plot(abs(y(1:500)));     	
+      </pre>
+    <p>More smoothing changes the powerspectrum from being flat to
+    having a peak at zero frequency. This is called "coloured" noise,
+    because instead of having the same amount in all frequencies (like
+    white noise), it has different amounts at different frequencies.
+</p></div>
+</li></ul>
+<p>
+
+</p><h3>Inverse FFT</h3>
+<p>Now let's play a little more with the inverse fourier transform, i.e. getting the
+  signal back given its Fourier transform. This is particularly
+  relevant for applications (such as MRI) where we measure the Fourier
+  transform of an object, and we want to reconstruct the object from
+  its Fourier transform.
+
+</p><p>Let us go back to our first example of a cosine signal. Plot the
+  signal, then calculate its FFT, then invert that transform and plot
+  the result. (here the original signal has a phase, i.e. at t=0 it is
+  not equal to 1):
+</p><pre>  mag  = 2;     % magnitude (arbitrary units)
+  freq = 5;     % frequency in Hz
+  samp = 100;   % sampling rate in Hz
+
+  t        = 0:1/samp:1;  % time (1s of data)
+  t        = t(1:end-1);  % remove last time point
+  N        = length(t);   % store the number of time points
+
+  x = mag*cos(2*pi*freq*t + 10);    % the signal equation (+phase)
+  figure
+  plot(t,x,'.-');
+
+  y  = fft(x);           % do Fast Fourier Transform
+  z  = ifft(y);
+
+  hold on, 
+  plot(t,z,'r--');
+</pre>
+<p>The <code>ifft</code> simply gives us the original signal back. Now let us try a few
+  experiments. What happens if we:
+</p><ul>
+<li> Remove the phase information prior to ifft?
+<span class="clickme" onclick="showIt(&#39;ans8&#39;)">Answer</span> 
+  <div id="ans8" class="answer" style="display: none"> 
+    <p>In this case, the reconstructed signal looks like the original
+    signal but shifted.
+      </p><pre>	y2 = abs(y);
+	z  = ifft(y2);
+	figure,hold on
+	plot(t,x),plot(t,z,'r--');
+      </pre>
+  </div>
+</li><li> Remove the magnitude information prior to ifft?
+<span class="clickme" onclick="showIt(&#39;ans9&#39;)">Answer</span> 
+  <div id="ans9" class="answer" style="display: none"> 
+    <p>In this case, the reconstructed signal looks nothing like the original
+    signal. You will see later that this is only true for simple
+    periodic signals. In the case where a signal contains interesting
+    features (e.g. transitions), the phase part of the FFT is more
+    important than the magnitude.
+      </p><pre>	y2 = exp(1i*angle(y));
+	z  = ifft(y2);
+	figure,hold on
+	plot(t,x),plot(t,z,'r--');
+      </pre>
+  </div>
+
+</li><li> Introduce "artefacts" in the fft prior to ifft? (meaning change
+  the magnitude and phase slightly, as if there were measurement errors).
+<span class="clickme" onclick="showIt(&#39;ans10&#39;)">Answer</span> 
+  <div id="ans10" class="answer" style="display: none"> 
+    <p>Let's try a few things: add spikes in the phase, spikes in the
+    magnitude, delete points from either.
+      </p><pre>	mag = abs(y);   mag(20) = 10; % spike in magnitude
+	ph  = angle(y); ph(10)  = 1;  % spike in phase
+
+	y2 = mag.*exp(1i*ph);
+	z  = real(ifft(y2));
+	figure,hold on
+	plot(t,x),plot(t,z,'r--');
+      </pre>
+    <p>Play a bit with the above. You notice that spikes in the
+    magnitude can introduce quite nasty effects (extra oscillations). 
+  </p></div>
+
+
+</li></ul> 
+
+<h3>Time-frequency plots</h3>
+<p>Sometimes a signal can have non-stationarities, i.e. behave
+  differently at different time-points. In such cases, it is useful to
+  be able to look at how the frequency content may vary over time. 
+</p><p>Download sample EEG data from
+   <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/eeg.mat">here</a>. 
+</p><p>Start by looking at the
+  powerspectrum of the data (the sampling rate for this data was
+  128Hz). 
+</p><pre>  load('eeg.mat');
+
+  samp = 128;                 % sampling rate in Hz
+  T    = 1/samp*length(eeg);  % total duration (in seconds)
+  
+  N    = length(eeg);          % store the number of time points
+  f    = linspace(0,N-1,N)/T;  % vector of frequencies for plotting
+
+  y = fft(eeg);
+  plot(f(1:N/2),abs(y(1:N/2)));
+</pre>
+<p>Note how we divide by the total duration to get the frequencies. We
+  didn't do that before because we generated 1 second of data. 
+</p><p>There are several peaks in the powerspectrum. The peak at 60Hz is a
+  contamination from the mains (the current that comes from the wall).
+</p><p>Now let's do a "sliding window" FFT, i.e. do an FFT for small time
+  windows and display the results as a time-by-frequency plot:
+</p><pre>  window = 1;            % 1 second window
+  nbins  = window*samp;  % corresponding number of time points
+
+  F = zeros(nbins/2,length(1:N-nbins));
+
+  for i=1:N-nbins
+    x = eeg(i:i+nbins-1);
+    y = fft(x);
+    F(:,k) = abs(y(1:nbins/2));  % only keep half of the fft  
+  end  
+</pre>
+<p>Now plot the resulting spectrum using <code>imagesc</code>:
+</p><pre>  figure,hold on
+  imagesc(log1p(F)); 
+</pre>
+<p>We used a log transform to better see the colours and
+  patterns. Now let's add the frequency axis and time label:
+</p><pre>  set(gca,'ytick',1:4:nbins/2,'yticklabel',num2str((0:4:nbins/2-1)'/window));
+  xlabel('time')
+</pre>
+<p>You should be able to see several features. First, the constant
+  60Hz signal (the mains). Second, most of the power is in the low
+  frequencies (which is what you should have seen in the overall
+  powerspectrum above). There are however bursts of changes in the
+  frequencies (vertical red lines in the time-frequency
+  spectrum).These correspond to events in the EEG experiment (I
+  believe this is a visual task).
+</p><p>You can also see that the time-frequency spectrum (also called
+  spectrogram) is a bit pixelized, this is because we have used a very
+  dumb, windowed approach to build it. There are several techniques to
+  make the windowing more clever.
+</p><p>Before you move on, perhaps you can try a few different values for
+  the sliding window and see how the spectrogram changes.
+
+
+
+
+</p><h3>2D Fourier transform</h3>
+<p>The 2 dimensional version of FFT in matlab is called FFT2. It is equivalent to
+  doing an FFT along one dimension then along the other. 
+
+</p><p>Let's look at the 2D FFT using images. First, we are
+  going to create an image from its FFT, to understand how the
+  magnitude and phase relate to the image. 
+
+</p><p>Create an image using a single spike in the magnitude and the
+  function <code>ifft2</code>:
+</p><pre>  mag=zeros(100,100);  % magnitude (all zeros for now)
+  ph=zeros(100,100);   % phase (all zeros for now)
+
+  mag(2,3)=1;          % 1 cycle in x, 2 cycles in y
+
+  y=mag.*exp(1i*ph);   % build fft combining mag and phase
+  x=real(ifft2(y));    % inverse fft (then take real part)
+  imagesc(x)           % plot
+
+</pre>
+<p>This needs some explaining. First, we've created a magnitude of 1
+  using mag(2,3)=1. Think of (2,3) as the 2nd and 3rd frequencies
+  along x and y respectively. The coordinate (1,1), which is the first
+  frequency, corresponds to zero frequency.
+</p><p>You should be able to clearly see a periodic pattern that contains
+  1 cycle along x and 2 cycles along y. You can see that even more
+  clearly by plotting a row or a column of x:
+</p><pre>  figure,hold on
+  plot(x(:,1));
+  plot(x(1,:),'r');
+  legend({'x axis','y axis'});
+</pre>
+
+<p>Now move the amplitude spike to different locations
+  (e.g. mag(5,10)=1 etc.) and look at the image obtained. Do the same
+  with the phase. Can you predict what happens before you visualise
+  the result?
+</p><p>Try adding more spikes and look at the image (e.g. a 2 cycle spike
+  and a 4 cycle spike, etc.). You should be able to see the image
+  getting more and more complicated. 
+
+
+</p><p>Now we will apply the 2D Fourier transform to a picture. 
+Download a picture of a cat from
+  here: <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/cat.jpg">CAT</a>. Display
+  the image. 
+</p><pre>  im = imread('cat.jpg');
+  im = im(:,:,1);  % only keep one colour channel
+
+  figure, imshow(im)
+</pre>
+
+<p>Beautiful no? Now let's look at its FFT (both the magnitude and phase):
+
+  </p><pre>    y=fft2(im);
+
+    clim=quantile(abs(y(:)),[.01 .99]);
+    figure
+    imagesc(fftshift(abs(y)),clim);colormap gray
+    title('magnitude');
+
+    clim=quantile(angle(y(:)),[.01 .99]);
+    figure
+    imagesc(fftshift(angle(y)),clim);colormap gray
+    title('phase')
+
+</pre>
+<p>Now not so beautiful hey? Ok, first make sure you understand the
+  code above. We used <code>fftshift</code>. That is because of the
+  way fft works in matlab (type help to read about
+  this). <code>fftshift</code> recenters the results so that zero
+  frequencies are in the centre (compare the code
+  above with and without <code>fftshift</code>). Also, don't pay too much attention to
+  the use of the quantile function (although read the help if you
+  haven't encountered it). We are only using it to help with
+  visualisation in imagesc.
+</p><p>The key things to notice from the fft of the cat image is that: (1)
+  the magnitude is mostly centered around zero, i.e. lots of low
+  frequencies, and (2) the phase image is difficult to interpret. This
+  is typical of real images.
+
+</p><p>Let's now try to reconstruct the image from its FFT, but using
+  incomplete versions of the FFT. What happens if:
+</p><ul>
+<li>We only use the magnitude?
+<span class="clickme" onclick="showIt(&#39;ans11&#39;)">Answer</span> 
+<div id="ans11" class="answer" style="display: none"> 
+  <pre>    mag = abs(y);
+    x   = ifft2(mag);
+    figure,imagesc(real(x));   
+  </pre>
+  <p>doesn't look very good. Let's use the quantiles for display:
+    </p><pre>      clim=quantile(real(x(:)),[0.01 0.99]);
+      imagesc(x,clim);
+    </pre>
+  <p>hmm, definitely doesn't look like a cat...
+</p></div>
+</li><li>We only use the phase?
+<span class="clickme" onclick="showIt(&#39;ans12&#39;)">Answer</span> 
+<div id="ans12" class="answer" style="display: none"> 
+  <pre>    ph = angle(y);
+    x   = ifft2(exp(1i*ph));
+    clim=quantile(real(x(:)),[0.01 0.99]);
+    figure,imagesc(real(x),clim);   
+  </pre>
+  <p>Looks like a cat! Well, not as nice as the original, but better
+  than just reconstructing the magnitude. This is because the
+  magnitude tells us what is happening (in terms of frequencies), and
+  the phase tells us "where" it is happening. So while magnitude was
+  sufficient for simple signals like a cosine, it fails for complex
+  signals like natural images, because then it really matters where
+  the oscillations are localised.
+</p></div>
+
+</li><li>We cut the centre of the FFT?
+ <span class="clickme" onclick="showIt(&#39;ans13&#39;)">Answer</span> 
+<div id="ans13" class="answer" style="display: none"> 
+  <p>Let's cut the centre of the fft by first building a box:
+    </p><pre>      siz = [5 5]  % size of the box
+      box = ones(size(im));
+      box(200-siz(1):200+siz(1),300-siz(2):300+siz(2)) = 0;
+      figure,imagesc(box);
+    </pre>
+  <p>Now we multiply the box by the fft of the original image and run
+  ifft2. (note: we need to use fftshift to make sure the zero
+  frequencies are in the centre of the image).
+    </p><pre>      y = fftshift(fft2(im));
+      y = y.*box;
+      x = ifft2(y);
+      figure, imshow(real(x));
+    </pre>
+  <p>As you can see, it looks like we only end up with the edges of the
+  original image. That is because we have removed the low frequencies
+  (edges are high frequency).
+</p></div>
+</li><li>We cut the edges of the FFT?
+   <span class="clickme" onclick="showIt(&#39;ans14&#39;)">Answer</span> 
+<div id="ans14" class="answer" style="display: none"> 
+  <p>We can use the previous box, and simply turn zeros to ones and
+  ones to zeros:
+    </p><pre>      box = ~box; % this turns zeros to ones and ones to zeros
+      y = fftshift(fft2(im));
+      y = y.*box;
+      x = ifft2(y);
+      figure, imshow(real(x));      
+    </pre>
+    <p>This time, we have removed the high frequencies. The image
+    looks a lot smoother.  Try with several box sizes.
+</p></div>
+
+</li></ul>
+
+<h3>Sampling and aliasing</h3>
+<p>Something that should have been obvious so far is that the data we
+  have been using are discrete. You can think of them as "samples"
+  from a continuous underlying data. Here we examine the effect of
+  sampling continuous data, in terms of the FFT, and in terms of
+  trying to reconstruct a "true" continuous object from samples or
+  samples of its FFT. 
+
+</p><p>The most important fact about sampling is this: taking samples in
+  real space is the same as repeating the Fourier transform
+  periodically, and the period of repetition is the inverse of the
+  sampling period. Read this again to make sure you understand
+  it. Perhaps the picture below can help:
+</p><p>
+<img src="./ONBI - Signal and Image Processing Practical_files/sampling.png" alt="Sampling image" width="600" height="320">
+
+</p><p>And the image below shows that it is also true the other way round:
+</p><p>
+<img src="./ONBI - Signal and Image Processing Practical_files/sampling2.png" alt="Sampling image" width="600" height="320">
+
+</p><p>Now, the above is true in general for the Fourier transform. But in
+  signal processing and the world of discrete data, we are doing a
+  discrete Fourier transform with the FFT. So in practice, <b>both</b>
+  the real and the Fourier domains are given by samples. This means
+  that they are both sampled, and they are both repeated! See the
+  figure below:
+</p><p>
+<img src="./ONBI - Signal and Image Processing Practical_files/sampling3.png" alt="Sampling image" width="600" height="320">
+
+</p><p>Now, when you run an FFT in matlab, the repeating pattern is not
+  apparent. That is because matlab implicitly considers the signal and
+  its FFT to be periodic (i.e. repeating) and only gives you one
+  period. 
+
+</p><p>How does the above information help us understand sampling? Well,
+  let's simulate a simple signal that consists of the superposition of
+  two cosine functions. We will simulate this signal at high sampling
+  rate (as if it was continuous), and see what happens when we downsample it. Begin by
+  generating the signal:
+</p><pre>  freq1 = 5;      % freq in Hz
+  freq2 = 1;      % freq in Hz
+  samp  = 1000;   % sampling rate in Hz
+
+  t        = 0:1/samp:1;  % time (1s of data)
+  t        = t(1:end-1);  % remove last time point
+  N        = length(t);   % store the number of time points
+
+  x = cos(2*pi*freq1*t) + .5*cos(2*pi*freq2*t);    % the signal equation
+  figure
+  plot(t,x,'.-');
+
+</pre>
+
+<p>Now remember: this signal is assumed by matlab to be periodic, so
+  even though it has finite duration, it will be treated by the FFT as
+  if it were repeating, and therefore as if it were a true cosine
+  function. 
+
+</p><p>Let's see what happens when we take subsamples from this signal
+  (make sure you understand all the code below):
+</p><pre>  F = 50;    % sub-sampling frequency (Hz)
+  T = 1/F;   % sub-sampling period (sec)
+  n = N*T;   % sub-sampling period (in samples)
+
+  z = x(1:n:end);    % sub-sampled signal
+  y = fft(z);        % fft of sub-sampled signal
+
+  subN = length(z);  % length of sub-sampled signal
+
+
+  f  = linspace(0,subN-1,subN);  % vector of frequencies for plotting
+
+  figure
+  plot(f(1:subN/2),abs(y(1:subN/2))) % plot powerspectrum as before
+
+</pre>
+<p>Now change the frequency of sub-sampling and see what happens to
+  the fourier transform. You should be able to see that as soon as you
+  drop below 10Hz, you loose the peak at 5Hz in the powerspectrum. Try
+  to use the <code>ifft</code> function to reconstruct the signal from
+  its fft and compare it to the almost continuous version. 
+ <span class="clickme" onclick="showIt(&#39;ans15&#39;)">Example</span> 
+</p><div id="ans15" class="answer" style="display: none"> 
+  <p>First generate the (almost) continuous mixture of two cosines:
+  </p><pre>    freq1 = 5;      % freq in Hz
+    freq2 = 1;      % freq in Hz
+    samp  = 1000;   % sampling rate in Hz
+
+    t        = 0:1/samp:1;  % time (1s of data)
+    t        = t(1:end-1);  % remove last time point
+    N        = length(t);   % store the number of time points
+
+    x = cos(2*pi*freq1*t) + .5*cos(2*pi*freq2*t);    % the signal equation
+    figure
+    plot(t,x,'.-');
+  </pre>
+  <p>Next sub-sample the signal and calculate the FFT of the
+  sub-sampled signal:
+    </p><pre>      F = 50;    % sub-sampling frequency (Hz)
+      T = 1/F;  % sub-sampling period (sec)
+      n = N*T;  % sub-sampling perior (in samples)
+
+      z = x(1:n:end); % sub-sampled signal
+      y = fft(z);
+    </pre>
+  <p>
+    Now reconstruct the signal from its FFT and plot:
+    </p><pre>      w = ifft(y);  
+      hold on
+      plot(t,w,'r--');
+    </pre>
+  <p>The reconstructed signal looks very similar to the original
+  one. Try now with lower sampling frequency and notice that things
+  break down below 10Hz because of aliasing.
+  
+</p></div>
+
+<p>Now let us look at another concept that we haven't looked at so
+  far: <b>zero padding</b>. We will use the 2D FFT and the cat example
+  to get an understanding of zero padding. First load the image and
+  downsample it by removing every other pixel:
+  </p><pre>  im=imread('cat.jpg');
+  x=im(1:2:end,1:2:end,1);  
+  figure
+  imshow(x)
+</pre>
+<p>Now let's look at the FFT of this image:
+</p><pre>  y=fft2(x);
+  clim=quantile(abs(y(:)),[.01 .99]);
+  figure
+  imagesc(fftshift(abs(y)),clim);colormap gray
+</pre>
+
+<p>Now let us recall the sampling pictures that we showed above. They
+  tell us that repeating the Fourier transform is the same as taking
+  samples in real space. Furthermore, the repeating period is
+  inversely related to the sampling period. 
+</p><p>Zero padding means adding zeros on either side of the FFT before
+  reconstructing the signal. Since the matlab FFT assumes the signal
+  to be periodic, zeropadding is like repeating the signal with
+  increased repeat period, which in the real domain means higher
+  sampling rate. Therefore, zero padding allows us to reconstruct an
+  image at higher resolution than the frequency domain allows us to,
+  and is closely related to the concept of interpolation. 
+</p><p>Let's see what the zero padded inverse FFT of the cat looks like:
+  </p><pre>    y = fftshift(y); % we need this before zero padding
+    z = ifft2(y,size(im,1),size(im,2)); % zero padded ifft
+    clim=quantile(abs(z(:)),[.01 .99]);
+    figure,imshow(abs(z),clim);colormap gray
+  </pre>
+
+<p>Compare to the original image, you should notice strange patterns
+  of "oscillations" caused by the interpolation. 
+
+
+</p><hr>
+<h2><a name="filtering">Filtering</a></h2>
+<p>Here we will implement a simple linear filter using convolution and
+  the Fourier transform. 
+</p><p>Recall that convolution in real space is the same as multiplication
+  in Fourier space, and vice versa. But convolution is more difficult
+  to implement than multiplication, so often it is a good idea to do a
+  Fourier transform of the signal and the filter, then multiply the
+  two FFTs together, and then do an inverse FFT.
+</p><p>Let's first design a filter. We are going to do this in 2D, so load
+  the cat image if you haven't done that yet. 
+</p><p>Now let's create a "moving average" filter (also called the mean filter). This means a box that
+  we are going to run through the image and take local averages. 
+</p><pre>  siz = [3 3];   % 3x3 box. You can play with changing this
+  box = ones(siz)/9;
+</pre>
+<p>Now we could create a loop through all the image and for each pixel
+  of the image replace the value by the weighted average within the
+  small box. Instead, we are going to do this via a Fourier
+  transform. First, let's calculate the Fourier transform of the image
+  and the filter:
+</p><pre>  x=im(:,:,1);
+  y=fft2(x);
+
+  f=fft2(box,size(x,1),size(x,2));  % use zeropadding
+  
+  z=ifft2(y.*f);  % inverse FFT of the product
+
+  figure,
+  clim=quantile(abs(z(:)),[.01 .99]);
+  imagesc(abs(z),clim);colormap gray
+</pre>
+<p>Beautifully simple no? Imagine doing this with a loop, and having
+  to worry about the edges of the image etc.  The effect of a moving
+  average filter is to blur the image, which can be useful for
+  denoising. Try with different filter sizes, what do you notice? 
+
+</p><p>A better behaved filter is the Gaussian filter. It is similar to
+  the mean filter, except that instead of the values in the box being
+  constant, they follow a Gaussian function centered in the middle of
+  the box and with given standard deviation. 
+</p><p>Now that you have seen the mean filter, try to implement the
+  Gaussian filter before you click on the 
+ <span class="clickme" onclick="showIt(&#39;ans16&#39;)">answer</span> 
+</p><div id="ans16" class="answer" style="display: none">   
+  <p>Let's first create the Gaussian box:
+  </p><pre>    gauss = zeros(15,15);   % size of the filter can be changed
+
+    sigma  = 10;             % sigma of the Gaussian (in pixels)
+    centre = [size(gauss,1)/2 size(gauss,2)/2]; % centre of the box
+
+    for i=1:size(gauss,1)
+     for j=1:size(gauss,2)
+      gauss(i,j) = exp(- sum(([i j]-centre).^2)/2/sigma^2 );
+     end
+    end
+    gauss = gauss/sum(gauss(:));
+  </pre>
+  <p>Plot the Gaussian box (also called kernel) to see what it looks
+  like:
+    </p><pre>      figure;
+      imagesc(gauss);
+    </pre>
+    
+  <p>Now convolve it with the cat image using the FFT trick:
+    </p><pre>      
+      x=im(:,:,1);
+      y=fft2(x);
+
+      f=fft2(gauss,size(x,1),size(x,2));  % use zeropadding
+      
+      z=ifft2(y.*f);  % inverse FFT of the product
+
+      figure,
+      clim=quantile(abs(z(:)),[.01 .99]);
+      imagesc(abs(z),clim);colormap gray
+    </pre>
+</div>
+<p>Try to use the Gaussian filter to denoise the cat image (add some
+  noise with the <code>randn</code> function and then convolve the result with the
+  Gaussian filter.
+
+</p><p>Let's now design another type of filter: an edge detection
+  filter. The simplest such filter is to do a derivative, which in
+  discrete terms is
+  simply the difference between adjacent pixels. 
+</p><p>Here are simple finite difference filters:
+</p><pre>  box = [-1 1];    % along x-dimension
+  box = [-1;1];    % along y-dimension
+  box = [-1 0 1];  % a slightly better filter along x
+  box = [-1;0;1];  % a slightly better filter along y
+
+</pre>
+<p>Now let's apply these filters to the cat image:
+</p><pre>  x=im(:,:,1);
+  y=fft2(x);
+
+  box = [-1 0 1]; % try with different ones if you have time
+  f=fft2(box,size(x,1),size(x,2));  % use zeropadding
+  
+  z=ifft2(y.*f);  % inverse FFT of the product
+
+  figure,
+  clim=quantile(abs(z(:)),[.01 .99]);
+  imagesc(abs(z),clim);colormap gray
+</pre>
+<p>You should be able to see edges along the x-dimension in the image
+  (similarly along the y dimension if you used the y-derivative
+  filter). These types of operations are extremely widely used in
+  image processing for extracting basic information from images. Other
+  types of filtering operations are also possible (such as non-linear
+  filters), but these can't be implemented with the Fourier
+  transform. 
+
+
+
+
+
+</p><hr>
+<h2><a name="imaging">Image reconstruction</a></h2>
+<h3>Computed Tomography</h3>
+<p>Image reconstruction means constructing the image of an object from
+  measurements. Here we are going to see two types of image
+  reconstruction which are at the basis of two very popular imaging
+  techniques: The Radon transform, which is at the heart of computed
+  tomography (CT), and the Fourier transform, which is the basis of
+  Magnetic Resonance Imaging (MRI).
+
+</p><p>You should be quite familiar with the Fourier transform by now, so
+  for a bit of a change, let's examine the Radon transform. 
+
+</p><p>The Radon transform takes an object, and calculates integrals along
+  lines crossing through the object at different angles. The figure
+  below illustrates this process:
+</p><p>
+<img src="./ONBI - Signal and Image Processing Practical_files/radon.png" alt="Sampling image" width="300" height="300">
+</p><p>In CT, X-rays are emitted by a source, they then go through an
+  object (typically a body) and get absorbed to various degrees before
+  hitting a detector. The signal that is measured is an integral along
+  a line from the source to the detector that calculates how much
+  absorption there was. So it is easy to see how this relates to the
+  radon transform.
+</p><p>Now, we are faced with the problem of reconstructing the object
+  (body organs), given CT measurements along various angles. The Radon
+  theorem tells us that we can recontruct the object perfectly if we
+  have an infinite number of measurement angles, but in practice this
+  is never the case. So let's see how few measurements we can get away
+  with.
+</p><p>First, we need an object. We are going to remain in 2 dimensions,
+  and we are going to use the most famous image in medical imaging:
+  the Shepp-Logan phantom. This image is so popular that it is
+  included in Matlab's imaging toolbox, so let's create it:
+</p><pre>  im=phantom;
+  figure, imagesc(im), colormap gray
+</pre>
+
+<p>Let's calculate the Radon transform along a single orientation:
+</p><pre>  R = radon(im,0);
+  figure, plot(R);
+</pre>
+<p>The above simply sums the values inside the phatom along lines that
+  are parallel to the x-axis. You can see that by comparing R to
+  sum(im). The only difference is that R has more points to account
+  for the fact that summing along directions that are at an angle
+  spans a wider number of pixels in the image.
+</p><p>Now let's look at the Radon transform along more angle and plot the
+  results:
+</p><pre>  R = radon(im,linspace(0,180,40));   % 40 angles from 0 to 180 degrees
+  figure, imagesc(R);
+</pre>
+<p>This funky looking image is your measurement. Now let's calculate
+  an inverse Radon transform and see what the object looks like:
+</p><pre>  x = iradon(R,linspace(0,180,40));
+  figure,imagesc(x),colormap gray
+</pre>
+<p>The inverse Radon transfrom is also called back-projection. You can
+  clearly see that this back-projection leaves "trails" behind when it
+  tries to reconstruct the object.  Try the above with different
+  numbers of projections to get a feel for how many is enough. Note
+  also that the small details in the object require more angles in
+  order to be properly recovered.
+
+</p><p>In CT, the measurement is actually not exactly the integral of the
+  object along the X-ray beam, but the integral of the "absorption"
+  along the beams. But we will ignore that and pretend that we are
+  measuring the integral of the object's mass. Next we are going to
+  introduce a "metal" artefact. This happens when a patient has an
+  implant inside their body. We can model that by introducing a spike
+  in the original phantom image:
+</p><pre>  im(100,80)=100; 
+</pre>
+<p>Now run the radon transform (to simulate the measurement process)
+  and then the iradon transform (reconstruction of the object from the
+  measurements). You should be able to see some striking artefacts
+  caused by the simulated metal implan. 
+</p><pre>  R = radon(im,linspace(0,180,100));
+  x = iradon(R,linspace(0,180,100));
+  figure,imagesc(x,[0 1]);colormap gray
+</pre>
+
+<p>The Radon transform is related to the Fourier transform via
+  the <b>projection-slice theorem</b>. This theorem states that if you
+  have an object (e.g. in 2D), then projecting the object onto a line
+  is the same as taking a slice through the 2D Fourier transform of
+  the object:
+</p><p>
+<img src="./ONBI - Signal and Image Processing Practical_files/sliceproj.png" alt="Sampling image" width="500" height="400">
+
+</p><p>Let us try to verify the projection-slice theorem on the phantom
+  image. To simplify things, let's just try a projection along either
+  X or Y axis (which can be done with the <code>sum</code> function in
+  Matlab). 
+<span class="clickme" onclick="showIt(&#39;ans17&#39;)">Answer</span> 
+</p><div id="ans17" class="answer" style="display: none">   
+  <pre>    im=phantom;
+    proj = sum(im,1);   % projection on the x axis (along the y axis)
+    f1d  = fft(proj);   % 1D Fourier
+    f2d  = fft2(im);    % 2D Fourier
+    slice = f2d(1,:);   % slice along x (through zero frequency)
+    
+    figure,hold on
+    plot(abs(f1d),'b'); plot(abs(slice),'r--');
+    figure,hold on
+    plot(angle(f1d),'b'); plot(angle(slice),'r--');        
+  </pre>
+  
+</div>
+<p>The projection-slice theorem therefore tells us that we can measure
+  the entire 2D FFT of an object by calculating the 1D FFT of its
+  projections along different angles. Therefore, we can, with an
+  inverse 2D FFT, reconstruct the object from its Radon transform
+  (i.e. provides a method for performing an inverse Radon transform). 
+As an exercise, you may try to implement the inverse radon transform
+of an image using the projection-slice theorem and the ifft.
+ 
+</p><h3>MRI</h3>
+<p>In MRI, the measurement of an object does not consist in integrals
+  along lines. Instead, we directly measure the Fourier transform of
+  the object. Typically, we measure the 2D Fourier transform of a
+  slice through the object (e.g. in a technique called Echo Planar
+  Imaging). 
+
+</p><p>The Fourier space in MRI is called k-space. You can imagine k-space
+  to be an image, where each pixel is a k-space sample, consisting of
+  a complex number (magnitude and phase). Image reconstruction is then
+  simply implemented with an inverse FFT (but with many twists
+  depending on how sophisticated the measurement is).
+
+</p><p>Because of time limitations in typical experiments, we can only
+  measure a smallish number of k-space pixels. This has consequences
+  in terms of the quality of the reconstructed image, and many
+  artefacts in MRI come from what happens when we measure k-space.
+
+</p><p>There are a number of MRI artefacts. In the remainder of this
+  practical, we are going to simulate 3 types of artefacts that are
+  frequent in MRI: Gibb's ringing, ghosting, and T2* blurring.
+
+</p><p>But first, download
+  this <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/brain.bmp">brain</a>
+  and load it into matlab:
+</p><pre>  im=imread('brain.bmp');  
+</pre>
+<p>Remember that in MRI, we measure the FFT of the object, aka
+  k-space. Let's generate a measured k-space data (and also centre k-space using <code>fftshift</code>):
+</p><pre>  data = fftshift(fft2(im));
+</pre>
+
+<h4>Gibb's ringing</h4>
+<p>Gibb's ringing occurs when the frequencies that are sampled in
+  k-space are not sufficiently high (remember: high frequencies are at
+  the edges of k-space, low frequencies at the centre). We simulate
+  this by "cutting" k-space along one of the two axes, as if we didn't
+  have enough time to acquire these data. To exagerate the ringing, we
+  will cut quite a lot of the high frequencies:
+</p><pre>  K = data(:,112:112+32-1);   % this turns k-space from 256x256 to 256x32
+</pre>
+<p>And now reconstruct the object as a full 256x256 (with zero padding,
+  remember?):
+</p><pre>  x = ifft2(K,256,256);
+  figure, imagesc(abs(x));    % we typically look at the magnitude 
+</pre>
+<p>You should be able to see the ringing artefacts along the
+  horizontal axis but not the vertical axis.
+
+</p><h4>Ghosting</h4>
+<p>Ghosting happens when even and odd k-space lines are intensity
+  modulated differently. We are going to simulate this by taking every other line in
+  k-space and scaling them by 80 percent:
+</p><pre>   K=data;
+   K(1:2:end,:) = 0.8*K(1:2:end,:);
+   x=ifft2(K);
+   figure, imagesc(abs(x));
+</pre>
+<p>You can see that the image gets "duplicated" and overlaps with
+  itself along the dimension where we did the intensity modulation.  Try along the
+  other dimension now:
+</p><pre>   K=data;
+   K(:,1:2:end) = 0.8*K(:,1:2:end);
+   x=ifft2(K);
+   figure, imagesc(abs(x));  
+</pre>
+<p>Why does this happen? One way to understand this is to notice that
+  modulating every other slice of the k-space data is like taking the
+  original k-space data (unmodulated), and adding to it k-space data
+  that is sampled at 2 pixel intervals (or rather adding -0.2 times that). Now remember that sampling in
+  one space is the same as repeating in the other space. Sampling with
+  a period of 2 pixels is the same as repeating with a period of N/2
+  pixels in the other space. So therefore, the reconstructed image is
+  like the original images, plus a "ghost" image that is repeated with
+  cycles of N/2 pixels.
+
+</p><h4>T2* blurring</h4>
+<p>The final MRI artefact that we will look at is T2* blurring. This
+  particular artefact is due to the fact that when we acquire k-space
+  data, the signal that we base our measurement on decays over time,
+  with a time constant called T2* (don't ask why!).
+</p><p>Typically, we acquire k-space, say, from the bottom to the top, so
+  we will simulate an intensity drop along that direction:
+</p><pre>  T2star = 20;            % milliseconds
+  Ttotal = 100;           % time it takes to "read" k-space
+  N      = size(data,1);  % number of pixels
+
+  K = data;
+  for i=1:size(K,2)
+   K(:,i) = K(:,i).*exp(-linspace(0,Ttotal,N)'/T2star);
+  end
+</pre>
+<p>Now let's reconstruct the object and see what happened:
+</p><pre>  x=ifft2(K);
+  figure,imagesc(abs(x));
+</pre>
+<p>You should be able to see some blurring along the vertical
+  axis. The shorter the value of T2* is, the more blurring there is
+  (try this!).
+</p><p>Why does this happen? The easiest way to understand this is to
+  consider that multiplying the k-space trajectory by an exponential
+  decay is the same as doing a convolution of the image space with the
+  Fourier transform of the exponential (which is called a
+  Lorentzian function). This convolution operation effectively blurs
+  the image.
+
+</p><p>Ok, well done for getting to the end of the practical. If you have
+  gone through it very fast and have plenty of time left, maybe you
+  can explore other possible sources of k-space MRI artefacts and try to
+  predict what happens to the object before you check with the inverse
+  FFT. It should be fun!
+
+</p><hr>
+<hr>
+
+<p class="centred">The End.</p>
+
+<hr>
+<hr>
+<small>Created by Saad Jbabdi (<a href="mailto:saad@fmrib.ox.ac.uk">saad@fmrib.ox.ac.uk</a>)</small>
+</div>
+
+
+
+</body></html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0058)https://users.fmrib.ox.ac.uk/~saad/ONBI/glm_practical.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link rel="stylesheet" type="text/css" href="./ONBI - GLM and PCA Practical_files/fsl.css">
+<script type="text/javascript" src="./ONBI - GLM and PCA Practical_files/showhide.js"></script>
+<title>ONBI - GLM and PCA Practical</title>
+</head>
+<body>
+<div id="practical">
+<h1 class="centred">ONBI - GLM and PCA Practical</h1>
+
+<hr>
+
+<h2>Practical Overview</h2>
+<p>This practical requires Matlab. Go through the page and execute the listed
+  commands in the Matlab command window (you can copy-paste). Don't click on
+  the "answers" links until you have thought hard about the
+  question. Raise your hand should you need any help.
+</p><h3>Contents:</h3>
+<dl class="contents">
+<dt><a href="https://users.fmrib.ox.ac.uk/~saad/ONBI/glm_practical.html#simpleGLM">General Linar Model</a></dt>
+<dd>Fitting the General Linar Model to some data</dd>
+<dt><a href="https://users.fmrib.ox.ac.uk/~saad/ONBI/glm_practical.html#PCA">Principal Component Analysis</a></dt>
+<dd>Doing PCA on some data</dd>
+
+</dl>
+<hr>
+<h2><a name="simpleGLM">Simple GLM </a></h2>
+
+<p>Let's start simple. Open matlab, and generate noisy data <b>y</b> using a
+  linear model with one regressor <b>x</b> and an intercept. I.e. <code>y=a+b*x</code> 
+</p><pre>  x = (1:20)';
+  intercept   = -10;
+  slope       = 2.5;
+  y = intercept + slope*x;  
+  y = y + 10*randn(size(y)); % add some noise
+</pre>
+<p>Now plot the data against <b>x</b>:
+</p><pre>  figure
+  plot(x,y,'o');
+  xlabel('x');
+  ylabel('y');
+</pre>
+<p>Let's compare fitting a linear model with and without the
+  intercept. First, set up two design matrices:
+</p><pre>    M1 = [x];                % w/o intercept
+    M2 = [ones(size(x)) x];  % w/ intercept
+</pre>
+<p>Look at M1 and M2 if you are not sure what they should look like
+  (e.g. type M1 in the Matlab command window and press enter).
+</p><p>Now solve the two GLMs:
+  </p><pre>    beta1 = pinv(M1)*y;
+    beta2 = pinv(M2)*y;
+  </pre>  
+<p>Look at the values in beta1 and beta2. How should we interpret the
+  meaning of these values? 
+<span class="clickme" onclick="showIt(&#39;hint0&#39;)">Answer</span> 
+  </p><div id="hint0" class="answer" style="display: none"> 
+<p>In the above, beta1 contains the estimate of the slope, whereas
+  beta2 contains estimates for the slope and the intercept (display
+  both beta1 and beta2 and make sure you know which is the slope and
+  which is the intercept - check against the design matrices).
+</p></div>
+
+<p>Plot the two models against the data:
+  </p><pre>    
+    figure;hold on;grid on
+    plot(x,y,'o');
+    plot(x,M1*beta1,'r-');
+    plot(x,M2*beta2,'b-');    
+  </pre>
+<p>Note how the red line must go through the
+  origin <code>(0,0)</code>, as there is no intercept in the model
+  (the intercept is always zero).
+</p><p>Note also how in this case the slope is higher when 
+  modelling the intercept. If we were to do statistics on this slope
+  coefficient (to determine if it were significantly different from
+  zero), would we find it more or less significant than if we hadn't
+  modelled the intercept?
+<span class="clickme" onclick="showIt(&#39;hint1&#39;)">Answer</span> 
+  </p><div id="hint1" class="answer" style="display: none"> 
+    It can go either way. If the intercept was positive, beta1 would
+    have been higher, but model fit 
+    poorer, which affects the variance on the estimate of beta1. 
+  </div> 
+<p>Compare fitting the same <b>M2</b> model (i.e. with a column of
+  one's as a regressor), with and without demeaning <b>x</b>. What
+  happens to the beta coefficients? How do we interpret the values in
+  beta2 after demeaning <b>x</b>? 
+<span class="clickme" onclick="showIt(&#39;hint2&#39;)">Answer</span> 
+  </p><div id="hint2" class="answer" style="display: none"> 
+    Let's first fit the demeaned model and display the regression
+    coefficients (the <code>betas</code>):
+    <pre>      M3 = [ones(size(x)) x-mean(x)];
+      beta3=pinv(M3)*y;
+      beta2
+      beta3
+    </pre>        
+    Notice that beta2(1) is closer to the intercept, and beta3(1) closer to
+    the mean of <b>y</b>. The column of one's in the design matrix
+    models the intercept if <b>x</b> is not demeaned, but models the mean if
+    <b>x</b> is demeaned. Notice that the estimate of the slope does
+    not change between the two models, despite changing the
+    corresponding regressor!
+  </div> 
+<hr>
+<p>Ok now let's have some fun with some real data. Download the Oxford
+  weather data textfile from this
+  link: <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/OxfordWeather.txt">OxfordWeather</a>
+  (right-click on the link and save on the disk). 
+</p><p>Now load the text file in matlab and arrange the columns of the
+  text file into different variables:
+</p><pre>  data = load('OxfordWeather.txt');
+
+  year       = data(:,1);
+  month      = data(:,2);
+  maxTemp    = data(:,3);
+  minTemp    = data(:,4);
+  hoursFrost = data(:,5);
+  rain       = data(:,6);
+  hoursSun   = data(:,7);
+  
+  meanTemp   = .5*(minTemp+maxTemp);
+
+</pre>
+<p>Plot some of the data to familiarise yourself with it.
+</p><pre>
+  figure
+  subplot(2,3,1),boxplot(rain,round(year/10)*10);         xlabel('decade');     ylabel('rain');
+  subplot(2,3,2),boxplot(rain,month);                     xlabel('month');    ylabel('rain');
+  subplot(2,3,3),plot(minTemp,maxTemp,'.k');              xlabel('minTemp');  ylabel('maxTemp');
+  subplot(2,3,4),plot(meanTemp,hoursFrost,'.k');          xlabel('meanTemp'); ylabel('hoursFrost');
+  subplot(2,3,5),boxplot(rain,round(meanTemp/3)*3);       xlabel('meanTemp'); ylabel('rain');
+  subplot(2,3,6),boxplot(hoursSun,month);                 xlabel('month');    ylabel('housrSun');
+  
+</pre>
+<p>You may notice from these plots that there is nothing much to model
+  about the rain (at least with a GLM). It simply rains all the
+  time... Instead, let's model the rest of the data in various ways:
+</p><ul>
+  <li>Fit a linear model with x=min and y=max monthly temperatures.
+    <span class="clickme" onclick="showIt(&#39;hint3&#39;)">Answer.</span> 
+  <div id="hint3" class="answer" style="display: none"> 
+    <pre>      % Fit linear model ( y=a*x )
+      x=minTemp;
+      y=maxTemp;
+
+      M=x;
+      beta=pinv(M)*y;
+
+      figure,hold on
+      plot(x,y,'o');
+      plot(x,M*beta,'r');
+
+      % Need a constant? ( y=a*x+b )   [what is b?]
+      M=[ones(size(x)) x];
+      beta=pinv(M)*y;
+      plot(x,M*beta,'g');
+    </pre>
+
+  </div> 
+  </li>
+  <li>Fit a quadratic model of the form y=a*x^2+b*x+c with x=month and
+  y=hoursSun. 
+    <span class="clickme" onclick="showIt(&#39;hint4.1&#39;)">Hint.</span> 
+    <div id="hint4.1" class="answer" style="display: none"> 
+      A quadratic model is simply a linear model with x and x^2 as
+      regressors (on top of the intercept).
+    </div>
+    <span class="clickme" onclick="showIt(&#39;hint4.2&#39;)">Answer.</span> 
+  <div id="hint4.2" class="answer" style="display: none"> 
+    <pre>      % Fit quadratic model ( y=a*x^2+b*x+c )
+      x=month;
+      y=hoursSun;
+
+      [~,i]=sort(x); % we have to sort the data according to x if we want a nice plot
+      x=x(i);
+      y=y(i);
+
+      M=[ones(size(x)) x x.^2];  % this is the cunning bit
+      beta=pinv(M)*y;
+      figure,hold on
+      plot(x,y,'o');
+      plot(x,M*beta,'r');
+
+    </pre>
+    </div>
+  </li>
+  <li>Fit an exponential model with x=min temperature and
+  y=hoursFrost.
+    <span class="clickme" onclick="showIt(&#39;hint5.1&#39;)">Hint.</span> 
+    <div id="hint5.1" class="answer" style="display: none">       
+      Start by log-transforming the data and notice that you end up
+      with a simple GLM.
+    </div>
+    <span class="clickme" onclick="showIt(&#39;hint5&#39;)">Answer.</span> 
+  <div id="hint5" class="answer" style="display: none"> 
+    <pre>      % Fit exponential model ( y=a*exp(b*x) )  
+
+      x=minTemp;
+      y=log(hoursFrost); % trick: in order to fit exp with GLM, use log transform!
+      
+      % unfortunately, this trick only works for hoursFrost&gt;0. So we need to
+      % exclude data points where hoursFrost=0:
+      x = x(hoursFrost&gt;0);
+      y = y(hoursFrost&gt;0)
+
+      [~,i]=sort(x); % again, easier to plot if we sort x and y
+      x=x(i);
+      y=y(i);
+      
+      M=[ones(size(x)) x];
+      beta=pinv(M)*y;
+      
+      figure,hold on
+      plot(meanTemp,hoursFrost,'o');
+      plot(x,exp(M*beta),'r');
+
+      % Note: the exponential model doesn't quite work for this
+      % data. Below we will try a polynomial model
+    </pre>
+    <p>Note that when applying a transform to
+      the data, there are two issues: (1) the transform is not always
+      defined, and (2) the sum of squared error is minimised in the
+      transformed domain, so may not be optimal for the actual
+      data. The fitted parameters using the GLM can still be used to
+      initialise a nonlinear fitting procedure.
+  </p></div>  
+  </li>
+  <li>
+    Write a generic function that can fit a polynomial of user-defined
+    order (i.e. y=a+b*x+c*x^2+d*x^3+...) and fit this model to the
+    hoursFrost data using meanTemp as a regressor. What polynomial
+    order gives the best fit without over-fitting?
+    <span class="clickme" onclick="showIt(&#39;hint6&#39;)">Answer.</span> 
+    <div id="hint6" class="answer" style="display: none">       
+      Create a text file called fit_poly.m with the following code:
+      <pre>	function [beta,pred,err,sse]=fit_poly(x,y,p)
+	% [beta,pred,err,sse]=fit_poly(x,y,p)
+	% 
+	% p is the degree of the polynomial	
+	
+        M=ones(size(x));
+        for i=1:p
+          xx = x.^i; xx=xx-mean(xx); xx=xx/norm(xx);
+          M=[M xx];
+        end
+	
+	beta = pinv(M)*y;   % regression coefficient
+ 
+	pred = M*beta;      % data predicted by the model
+	err  = y-M*beta;    % error
+	sse  = sum(err.^2); % sum of squared error
+      </pre>
+      Use the above function on meanTemp/hoursFrost data:
+      <pre>	x=meanTemp;
+	y=hoursFrost;
+	
+	[~,i]=sort(x);
+	x=x(i);
+	y=y(i);
+
+	figure,hold on
+	plot(x,y,'o');
+	
+	[beta,pred]=fit_poly(x,y,5);
+	plot(x,pred,'r','linewidth',2);
+        
+        
+      </pre>
+      <p>Qualitatively, a polynomial of order 5 seems to give a good fit
+	without over-fitting. Techniques for formally testing model
+	order are out of scope here, but we can mention cross-validation
+	as an example.
+      </p><p>There are many ways of doing cross-validation, the simplest
+      being to exclude one or a few data-points, fit the model, and
+      test the error on the left-out data points. Repeat the process
+      for different left-out data, and look at the average error. This
+      method gives very good results in terms of "predictive" power,
+      i.e. how good a model is at predicting unseen data.
+    </p></div>
+  </li>
+  <li>
+    Try to write down other models that can be fitted with the GLM
+    (including via transformation of the data) and use simulated data
+    to fit them. 
+    <span class="clickme" onclick="showIt(&#39;hint6.1&#39;)">Some examples.</span> 
+    <div id="hint6.1" class="answer" style="display: none">   
+      Here are some examples. 
+      <pre>	y = a*exp(b*x+c*x^2);  % unknown:a,b,c : log transform the data to get GLM
+	y = a*cos(x+phi);      % unknown a,phi : use trigonometric equalities to get GLM
+	y = 1/(1+a*exp(b*x));  % unknown a,b   : log-transform
+      </pre>
+      <p>Let's do the cosine example as it is the most fun:
+	</p><pre>	  
+	  x   = linspace(0,10,40)';
+	  a   = 5;    % amplitude parameter
+	  phi = pi/4; % phase parameter
+
+	  y   = a*cos(x+phi);      % generate data using cosine model
+	  y   = y+randn(size(y));  % add noise
+
+	  figure,hold on
+	  plot(x,y,'o')
+
+	  % the trick:
+	  % a*cos(x+phi) = a*cos(x)*cos(phi) - a*sin(x)*sin(phi)
+	  %              = [a*cos(phi)]*(cos(x)) + [a*sin(phi)]*(-sin(x))
+	  % let A=a*cos(phi) and B=a*sin(phi)
+	  % which can be inverted thusly: a=norm([A;B]) and phi=atan2(B/a,A/a)
+	  % 
+	  % We now have a linear model for A and B: y = A*cos(x)+B*(-sin(x))
+	  
+
+	  M    = [cos(x) -sin(x)];
+	  beta = pinv(M)*y;
+	  
+	  a_hat   = norm(beta);
+	  phi_hat = atan2(beta(2)/a_hat,beta(1)/a_hat);
+	  
+	  plot(x,a_hat*cos(x+phi_hat),'r');
+
+	</pre>
+      <p>One might ask if we can fit <code>y=a*cos(w*x+phi)</code>
+      for <code>(a,w,phi)</code>, i.e. find the frequency as well as
+      the amplitude and phase. We of course can, but this is no longer
+      a linear model, and we need to resort to other means (such as
+      nonlinear fitting).
+      
+    </p></div>
+    
+  </li>
+</ul>
+
+
+<hr>
+<hr>
+<h2><a name="simpleEig">Eigenvalues/Eigenvectors of data clouds</a></h2>
+<p>Here we will switch gears and turn our attention to eigenvalue
+  decompositions. We will use eigenvalues in the context of data
+  dimensionality reduction. 
+</p><p>First, let's generate a 2D data cloud. The following code generates
+  data that follows a Gaussian distribution with a covariance matrix
+  that has a 60 degree rotation with respect to the x-axis. Read the
+  code carefully and try to understand all the different steps. 
+</p><pre>  mu=[5;2];                                     % mean position
+  ang=60;                                       % angle in degrees
+  R=[cosd(ang) -sind(ang);sind(ang) cosd(ang)]; % rotation matrix
+  sig=R*[1.3 0;0 .1]*R';                        % rotated covariance matrix
+  y=mvnrnd(mu,sig,100);                         % create points using multivariate gaussian random
+
+  % In case where mvnrnd is not installed (statistics toolbox), use
+  % Cholesky decomposition to generate the samples:
+  A=chol(sig);
+  y=(repmat(mu,1,100) + A'*randn(2,100))';       
+
+  figure,hold on                                % plot the data  
+  plot(y(:,1),y(:,2),'b.');
+</pre>
+<p>Now keep the previous plot open, demean the data, and plot the
+  demeaned data on the same plot.
+</p><pre>  ydemean=y-repmat(mean(y),100,1);
+  plot(ydemean(:,1),ydemean(:,2),'k.');
+</pre>
+<p>Next, calculate the eigenvalue decomposition of the covariance
+  matrix and plot the eigenvectors scaled by the square-root of their eigenvalues.
+</p><pre>  [v,d]=eig(cov(y));
+  d=sqrt(diag(d));
+ 
+  % Plot the two eigenvectors
+  axis equal,
+  quiver(0,0,v(1,2),v(2,2),3*d(2),'color','r'); % major eigenvector
+  quiver(0,0,v(1,1),v(2,1),3*d(1),'color','b'); % minor eigenvector
+</pre>
+<p>It should be clear that the major eigenvector (in red) is aligned
+  with the direction of most "variance" in the data, and that the
+  minor eigenvector is orthogonal to the major one, and is aligned 
+  with the direction of least variance. This is true because
+  we have generated data using a Gaussian distribution.
+</p><p>Now project the data onto the first eigenvector and plot the
+  projected data.
+</p><pre>  yy = (ydemean*v(:,2))*v(:,2)';
+  plot(yy(:,1),yy(:,2),'g.');
+</pre>
+<p>Now we do the same thing, but this time on a data set that does not
+  have an interesting direction of maximum variance, but instead has
+  information that is cast along a "radial" dimension.
+</p><p>Start by generating the doughnut data set (make sure you understand
+  what each line is doing in the following code):
+</p><pre>  t = 2*pi*rand(1000,1); % random angle
+  r = .5+rand(1000,1);   % random radius between .5 and 1.5
+  x=r.*sin(t);
+  y=r.*cos(t);
+
+  figure,set(gcf,'color','w'),hold on
+  plot(x,y,'o')
+  axis equal
+</pre>
+<p>Now do the PCA on this data by calculating the eigenvalues of the
+  covariance matrix:
+</p><pre>  Y=[x y];
+  [v,d]=eig(cov(Y));
+  d=sqrt(diag(d));
+
+  quiver(0,0,v(1,2),v(2,2),3*d(2),'color','r');
+  quiver(0,0,v(1,1),v(2,1),3*d(1),'color','b');
+
+</pre>
+<p>The resuting directions, as you can see, do not indicate any
+  particularly useful feature of the data. In fact, they are
+  completely random (driven by the noise, since the model is
+  completely symmetric). 
+</p><p>Furthermore, if we project the data onto
+  the mean eigenvector, we loose all information on the doughnut:
+</p><pre>    ydemean=Y-repmat(mean(Y),size(Y,1),1);
+    yy = (ydemean*v(:,2))*v(:,2)';
+    plot(yy(:,1),yy(:,2),'g.');
+</pre>
+<p>Now one last data-cloud example. Consider the data generated with
+  the following bit of code:
+</p><pre>  y1=mvnrnd([0;0],[1,0;0 20],1000); 
+  y2=mvnrnd([5;0],[1,0;0 20],1000); 
+  y=[y1;y2];
+  y=y-repmat(mean(y),2000,1); % demeand the data to keep things simple
+
+  figure;hold on
+  plot(y(:,1),y(:,2),'k.');
+  axis equal
+  
+</pre>
+<p>As you can see, the data comes in two interesting
+  clusters. However, the direction of maximum variance is orthogonal
+  to the direction that separates the two clusters. Let's see how this
+  affects the results of a data reduction that uses PCA.
+</p><p>First calculate the eigenspectrum of the covariance matrix and plot
+  the major and minor eigenvectors:
+</p><pre>  [v,d]=eig(cov(y));
+  d=sqrt(diag(d));
+  quiver(0,0,v(1,2),v(2,2),3*d(2),'color','r'); % major eigenvector
+  quiver(0,0,v(1,1),v(2,1),3*d(1),'color','b'); % minor eigenvector
+</pre>
+<p>Now project the data onto the first eigenvector. You can see that
+  the cluster information is completely lost. PCA is not a good way to
+  cleanup this data.
+</p><pre>  yy = (y*v(:,2))*v(:,2)';
+  plot(yy(:,1),yy(:,2),'g.');
+</pre>
+
+<hr>
+
+<h2><a name="PCA">PCA of the world</a></h2>
+<p>Let us finish with a fun example, PCA of the world map. I've chosen the world map
+  because, although the data is multi-dimensional, which precludes
+  from simple data-cloud style visualisation, information in the data can still be
+  visualised as a matrix.
+</p><p>First, download the data file
+  from <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/world-map.gif">here</a>.
+</p><p>Now open the data in Matlab and visualise it
+  with <code>imagesc</code>.
+</p><pre>  im = double(imread('world-map.gif'));  % read image
+  im=sum(im,3);                          % sum across the three colour channels
+  imagesc(im);                           % display the image
+
+</pre>
+<p>Start by calculating the eigenspectrum of the data covariance
+  matrix:
+</p><pre>  [v,d]=eig(cov(im));
+</pre>
+<p>Now we are going to reduce the dimensionality of the data by
+  reconstructing the data using a subset of the eigenvectors. To this
+  end, we need to first demean the rows of the data matrix:
+</p><pre>  x=im;
+  m=mean(x,2);
+  for i=1:size(x,1)
+    x(i,:) = x(i,:) - m(i);
+  end
+</pre>
+<p>Next, reconstruct the data using only the top <code>p</code>
+  eigenvectors. Look at what happens with and without adding the mean
+  back to the data. Play with different values of <code>p</code>. When
+  do we start seeing Great Britain? 
+  </p><pre>    p=4;
+    % reconstruct the data with top p eigenvectors
+    y = (x*v(:,end-p+1:end))*v(:,end-p+1:end)';
+    % plotting 
+    figure
+    subplot(3,1,1);imagesc(im)
+    subplot(3,1,2);imagesc(y)
+    % add mean
+    for i=1:size(x,1)
+      y(i,:) = y(i,:) + m(i);
+    end
+    subplot(3,1,3);imagesc(y)
+
+  </pre>
+
+  <p> Same as above but with <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/Queen_Victoria_by_Bassano.jpg">Queen Victoria</a>. When do you start to see
+    her moustache?
+</p><pre>  im = double(imread('Queen_Victoria_by_Bassano.jpg'));
+  im = sum(im,3);
+
+  % reconstruct the data with top p eigenvectors
+  [v,d]=eig(cov(im));
+  p=4;
+  x=im;
+  m=mean(x,2);
+  for i=1:size(x,1)
+    x(i,:) = x(i,:) - m(i);
+  end
+  y = (x*v(:,end-p+1:end))*v(:,end-p+1:end)';
+  % plotting 
+  figure
+  colormap(gray);
+  subplot(1,3,1); imagesc(im);
+  subplot(1,3,2); imagesc(y);
+  % add mean
+  for i=1:size(x,1)
+  y(i,:) = y(i,:) + m(i);
+  end
+  subplot(1,3,3); imagesc(y)
+</pre>
+
+<hr>
+<hr>
+
+<p class="centred">The End.</p>
+
+<hr>
+<hr>
+<small>Created by Saad Jbabdi (<a href="mailto:saad@fmrib.ox.ac.uk">saad@fmrib.ox.ac.uk</a>)</small>
+</div>
+
+
+
+</body></html>
