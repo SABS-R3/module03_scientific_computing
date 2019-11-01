@@ -184,7 +184,7 @@ a   = 5     # amplitude parameter
 phi = np.pi/4 # phase parameter
 
 y   = a * np.cos(x+phi)            # generate data using cosine model
-y   = y + np.random.randn(len(y))  # add noise
+y   = y + np.random.randn(len(y),1)  # add noise
 
 plt.clf()
 plt.plot(x, y, 'o')
@@ -198,7 +198,7 @@ plt.plot(x, y, 'o')
 # We now have a linear model for A and B: y = A*cos(x)+B*(-sin(x))
 
 
-M    = np.cos(x) - np.sin(x)
+M    = np.concatenate([np.cos(x), -np.sin(x)], axis=1)
 beta = np.linalg.pinv(M) @ y
 
 a_hat   = np.linalg.norm(beta)

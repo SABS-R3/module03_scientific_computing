@@ -13,8 +13,8 @@
 <hr>
 
 <h2>Practical Overview</h2>
-<p>This practical requires Matlab. Go through the page and execute the listed
-  commands in the Matlab command window (you can copy-paste). Don't click on
+<p>This practical requires Python. Go through the page and execute the listed
+  commands in your IDE of choice (you can copy-paste). Don't click on
   the "answers" links until you have thought hard about the
   question. Raise your hand should you need any help.
 </p><h3>Contents:</h3>
@@ -28,29 +28,33 @@
 <hr>
 <h2><a name="simpleGLM">Simple GLM </a></h2>
 
-<p>Let's start simple. Open matlab, and generate noisy data <b>y</b> using a
+<p>Let's start simple. Using Python, generate noisy data <b>y</b> using a
   linear model with one regressor <b>x</b> and an intercept. I.e. <code>y=a+b*x</code> 
-</p><pre>  x = (1:20)';
+</p><pre>  
+  x = (1:20)';
   intercept   = -10;
   slope       = 2.5;
   y = intercept + slope*x;  
   y = y + 10*randn(size(y)); % add some noise
 </pre>
 <p>Now plot the data against <b>x</b>:
-</p><pre>  figure
+</p><pre>  
+  figure
   plot(x,y,'o');
   xlabel('x');
   ylabel('y');
 </pre>
 <p>Let's compare fitting a linear model with and without the
   intercept. First, set up two design matrices:
-</p><pre>    M1 = [x];                % w/o intercept
+</p><pre>    
+    M1 = [x];                % w/o intercept
     M2 = [ones(size(x)) x];  % w/ intercept
 </pre>
 <p>Look at M1 and M2 if you are not sure what they should look like
   (e.g. type M1 in the Matlab command window and press enter).
 </p><p>Now solve the two GLMs:
-  </p><pre>    beta1 = pinv(M1)*y;
+  </p><pre>    
+    beta1 = pinv(M1)*y;
     beta2 = pinv(M2)*y;
   </pre>  
 <p>Look at the values in beta1 and beta2. How should we interpret the
@@ -92,7 +96,8 @@
   </p><div id="hint2" class="answer" style="display: none"> 
     Let's first fit the demeaned model and display the regression
     coefficients (the <code>betas</code>):
-    <pre>      M3 = [ones(size(x)) x-mean(x)];
+    <pre>      
+      M3 = [ones(size(x)) x-mean(x)];
       beta3=pinv(M3)*y;
       beta2
       beta3
@@ -111,7 +116,8 @@
   (right-click on the link and save on the disk). 
 </p><p>Now load the text file in matlab and arrange the columns of the
   text file into different variables:
-</p><pre>  data = load('OxfordWeather.txt');
+</p><pre>  
+  data = load('OxfordWeather.txt');
 
   year       = data(:,1);
   month      = data(:,2);
@@ -142,7 +148,8 @@
   <li>Fit a linear model with x=min and y=max monthly temperatures.
     <span class="clickme" onclick="showIt(&#39;hint3&#39;)">Answer.</span> 
   <div id="hint3" class="answer" style="display: none"> 
-    <pre>      % Fit linear model ( y=a*x )
+    <pre>
+      % Fit linear model ( y=a*x )
       x=minTemp;
       y=maxTemp;
 
@@ -170,7 +177,8 @@
     </div>
     <span class="clickme" onclick="showIt(&#39;hint4.2&#39;)">Answer.</span> 
   <div id="hint4.2" class="answer" style="display: none"> 
-    <pre>      % Fit quadratic model ( y=a*x^2+b*x+c )
+    <pre>
+      % Fit quadratic model ( y=a*x^2+b*x+c )
       x=month;
       y=hoursSun;
 
@@ -196,7 +204,8 @@
     </div>
     <span class="clickme" onclick="showIt(&#39;hint5&#39;)">Answer.</span> 
   <div id="hint5" class="answer" style="display: none"> 
-    <pre>      % Fit exponential model ( y=a*exp(b*x) )  
+    <pre>
+      % Fit exponential model ( y=a*exp(b*x) )  
 
       x=minTemp;
       y=log(hoursFrost); % trick: in order to fit exp with GLM, use log transform!
@@ -236,7 +245,8 @@
     <span class="clickme" onclick="showIt(&#39;hint6&#39;)">Answer.</span> 
     <div id="hint6" class="answer" style="display: none">       
       Create a text file called fit_poly.m with the following code:
-      <pre>	function [beta,pred,err,sse]=fit_poly(x,y,p)
+      <pre>	
+  function [beta,pred,err,sse]=fit_poly(x,y,p)
 	% [beta,pred,err,sse]=fit_poly(x,y,p)
 	% 
 	% p is the degree of the polynomial	
@@ -288,7 +298,8 @@
     <span class="clickme" onclick="showIt(&#39;hint6.1&#39;)">Some examples.</span> 
     <div id="hint6.1" class="answer" style="display: none">   
       Here are some examples. 
-      <pre>	y = a*exp(b*x+c*x^2);  % unknown:a,b,c : log transform the data to get GLM
+      <pre>	
+  y = a*exp(b*x+c*x^2);  % unknown:a,b,c : log transform the data to get GLM
 	y = a*cos(x+phi);      % unknown a,phi : use trigonometric equalities to get GLM
 	y = 1/(1+a*exp(b*x));  % unknown a,b   : log-transform
       </pre>
@@ -344,7 +355,8 @@
   data that follows a Gaussian distribution with a covariance matrix
   that has a 60 degree rotation with respect to the x-axis. Read the
   code carefully and try to understand all the different steps. 
-</p><pre>  mu=[5;2];                                     % mean position
+</p><pre>  
+  mu=[5;2];                                     % mean position
   ang=60;                                       % angle in degrees
   R=[cosd(ang) -sind(ang);sind(ang) cosd(ang)]; % rotation matrix
   sig=R*[1.3 0;0 .1]*R';                        % rotated covariance matrix
@@ -360,7 +372,8 @@
 </pre>
 <p>Now keep the previous plot open, demean the data, and plot the
   demeaned data on the same plot.
-</p><pre>  ydemean=y-repmat(mean(y),100,1);
+</p><pre>  
+  ydemean=y-repmat(mean(y),100,1);
   plot(ydemean(:,1),ydemean(:,2),'k.');
 </pre>
 <p>Next, calculate the eigenvalue decomposition of the covariance
