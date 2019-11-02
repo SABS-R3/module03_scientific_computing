@@ -17,7 +17,7 @@ m = np.mean(x, axis=1)
 for i in range(x.shape[0]):
     x[i,:] = x[i,:] - m[i]
 
-p = 4;
+p = 20;
 
 # reconstruct the data with top p eigenvectors
 y = (x @ v[:,:p]) @ v[:,:p].transpose()
@@ -25,7 +25,7 @@ y = (x @ v[:,:p]) @ v[:,:p].transpose()
 # plotting
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
 ax1.imshow(im)
-ax2.imshow(np.real(y))
+ax2.imshow(np.abs(y))
 
 # add mean
 for i in range(x.shape[0]):
