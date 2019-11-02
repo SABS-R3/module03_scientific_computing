@@ -41,11 +41,15 @@ plt.plot(ydemean[:,0], ydemean[:,1], 'k.')
 plt.arrow(0,0,d[0]*v[0,0],d[0]*v[1,0],color='b',width=0.05)   # minor eigenvector
 plt.arrow(0,0,d[1]*v[0,1],d[1]*v[1,1],color='r',width=0.05)   # major eigenvector
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 yy = (ydemean @ v[:,1].reshape(-1,1)) @ v[:,1].reshape(1,-1)
 plt.plot(yy[:,0], yy[:,1], 'g.')
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 
@@ -57,6 +61,8 @@ y = r*np.cos(t);
 plt.clf()
 plt.plot(x,y,'o')
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 Y = np.concatenate([x, y], axis=1)
@@ -68,6 +74,8 @@ plt.plot(x,y,'o')
 plt.arrow(0,0,d[1]*v[0,1],d[1]*v[1,1],color='r',width=0.05)
 plt.arrow(0,0,d[0]*v[0,0],d[0]*v[1,0],color='b',width=0.05)
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 
@@ -75,6 +83,8 @@ ydemean = Y - np.mean(Y, axis=0)
 yy = (ydemean @ v[:,1].reshape(-1,1))*v[:,1].reshape(1,-1)
 plt.plot(yy[:,0],yy[:,1],'g.');
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 
@@ -90,6 +100,8 @@ y = y - np.mean(y, axis=0)    # demeand the data to keep things simple
 plt.clf()
 plt.plot(y[:,0],y[:,1],'k.')
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 d,v = np.linalg.eig(np.cov(y.transpose()))
@@ -99,11 +111,15 @@ plt.plot(y[:,0],y[:,1],'k.')
 plt.arrow(0,0,d[1]*v[0,1],d[1]*v[1,1],color='r',width=0.05); # major eigenvector
 plt.arrow(0,0,d[0]*v[0,0],d[0]*v[1,0],color='b',width=0.05); # minor eigenvector
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 yy = (y @ v[:,1].reshape(-1,1)) @ v[:,1].reshape(1,-1);
 plt.plot(yy[:,0],yy[:,1],'g.')
 plt.axis('equal')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.show()
 
 

@@ -1,56 +1,60 @@
+import numpy as np
+import scipy
+import imageio
+import matplotlib.pylab as plt
+
+im = imageio.imread('world-map.gif').astype('float64')  # read image
+im = np.sum(im, axis=2)                  # sum across the three colour channels
+plt.imshow(im)                           # display the image
+plt.gray()
+plt.show()
+
+d,v = np.linalg.eig(np.cov(im.transpose()))
+
+x = im
+m = np.mean(x, axis=1)
+
+for i in range(x.shape[0]):
+    x[i,:] = x[i,:] - m[i]
+
+p = 4;
+
+# reconstruct the data with top p eigenvectors
+y = (x @ v[:,:p]) @ v[:,:p].transpose()
+
+# plotting
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+ax1.imshow(im)
+ax2.imshow(np.real(y))
+
+# add mean
+for i in range(x.shape[0]):
+    y[i,:] = y[i,:] + m[i]
+ax3.imshow(np.abs(y))
+plt.show()
 
 
-im = double(imread('world-map.gif'));  % read image
-im=sum(im,3);                          % sum across the three colour channels
-imagesc(im);                           % display the image
+im = imageio.imread('Queen_Victoria_by_Bassano.jpg').astype('float64')
+im = np.sum(im, axis=2)
 
+# reconstruct the data with top p eigenvectors
+d,v = np.linalg.eig(np.cov(im.transpose()))
+idx = d.argsort()[::-1]
+v = v[:,idx]
+p = 4
+x = im
+m = np.mean(x, axis=1)
+for i in range(x.shape[0]):
+    x[i,:] = x[i,:] - m[i]
+y = (x @ v[:,:p]) @ v[:,:p].transpose()
 
+# plotting
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+ax1.imshow(im)
+ax2.imshow(y)
 
-[v,d]=eig(cov(im));
-
-
-x=im;
-  m=mean(x,2);
-  for i=1:size(x,1)
-    x(i,:) = x(i,:) - m(i);
-  end
-
-
-  p=4;
-    % reconstruct the data with top p eigenvectors
-    y = (x*v(:,end-p+1:end))*v(:,end-p+1:end)';
-    % plotting
-    figure
-    subplot(3,1,1);imagesc(im)
-    subplot(3,1,2);imagesc(y)
-    % add mean
-    for i=1:size(x,1)
-      y(i,:) = y(i,:) + m(i);
-    end
-    subplot(3,1,3);imagesc(y)
-
-
-
-im = double(imread('Queen_Victoria_by_Bassano.jpg'));
-  im = sum(im,3);
-
-  % reconstruct the data with top p eigenvectors
-  [v,d]=eig(cov(im));
-  p=4;
-  x=im;
-  m=mean(x,2);
-  for i=1:size(x,1)
-    x(i,:) = x(i,:) - m(i);
-  end
-  y = (x*v(:,end-p+1:end))*v(:,end-p+1:end)';
-  % plotting
-  figure
-  colormap(gray);
-  subplot(1,3,1); imagesc(im);
-  subplot(1,3,2); imagesc(y);
-  % add mean
-  for i=1:size(x,1)
-  y(i,:) = y(i,:) + m(i);
-  end
-  subplot(1,3,3); imagesc(y)
-
+# add mean
+for i in range(x.shape[0]):
+    y[i,:] = y[i,:] + m[i]
+ax3.imshow(y)
+plt.show()
