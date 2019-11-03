@@ -1,9 +1,10 @@
 import numpy as np
 import scipy
-import imageio
+import skimage as ski
+import skimage.io
 import matplotlib.pylab as plt
 
-im = imageio.imread('world-map.gif').astype('float64')  # read image
+im = ski.io.imread('world-map.gif').astype('float64')  # read image
 im = np.sum(im, axis=2)                  # sum across the three colour channels
 plt.imshow(im)                           # display the image
 plt.gray()
@@ -34,7 +35,7 @@ ax3.imshow(np.abs(y))
 plt.show()
 
 
-im = imageio.imread('Queen_Victoria_by_Bassano.jpg').astype('float64')
+im = ski.io.imread('Queen_Victoria_by_Bassano.jpg').astype('float64')
 im = np.sum(im, axis=2)
 
 # reconstruct the data with top p eigenvectors
