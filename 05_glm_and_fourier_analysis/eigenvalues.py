@@ -28,7 +28,6 @@ plt.ylabel('y')
 
 ydemean = y - np.mean(y,axis=0)
 plt.plot(ydemean[:,0], ydemean[:,1], 'k.')
-plt.axis('equal')
 plt.show()
 
 d,v = np.linalg.eig(np.cov(y.transpose()))

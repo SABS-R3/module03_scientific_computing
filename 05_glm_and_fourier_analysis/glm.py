@@ -9,7 +9,6 @@ slope       = 2.5
 y = intercept + slope*x
 y = y + 10*np.random.randn(len(y),1) # add some noise
 
-plt.figure()
 plt.plot(x,y,'o')
 plt.xlabel('x')
 plt.ylabel('y')
@@ -22,7 +21,6 @@ M2 = np.concatenate([np.ones((len(x),1)), x], axis=1) # w/ intercept
 beta1 = np.linalg.pinv(M1) @ y
 beta2 = np.linalg.pinv(M2) @ y
 
-plt.clf()
 plt.grid(True)
 plt.plot(x,y,'o')
 plt.plot(x, M1 @ beta1, 'r-')
@@ -40,7 +38,6 @@ df = pd.read_csv('OxfordWeather.txt', delim_whitespace=True, header=None, names=
 
 meanTemp   = .5*(df.minTemp+df.maxTemp)
 
-plt.close()
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3)
 decades = (np.round(df.year/10)*10)
 ax1.boxplot([df.rain[decades == i] for i in decades.unique()],
@@ -82,17 +79,16 @@ y = df.maxTemp.values.reshape(-1,1)
 M = x
 beta = np.linalg.pinv(M) @ y
 
-plt.clf()
 plt.plot(x, y, 'o')
 plt.plot(x, M @ beta,'r')
 plt.xlabel('minTemp')
 plt.ylabel('maxTemp')
-plt.show()
 
 # Need a constant? ( y=a*x+b )   [what is b?]
 M = np.concatenate([np.ones((len(x),1)), x], axis=1)
 beta = np.linalg.pinv(M) @ y
 plt.plot(x, M @ beta, 'g')
+plt.show()
 
 # Fit quadratic model ( y=a*x^2+b*x+c )
 x = df.month.values.reshape(-1,1)
@@ -104,7 +100,6 @@ y = y[i]
 
 M = np.concatenate([np.ones_like(x), x, x**2], axis=1)  # this is the cunning bit
 beta = np.linalg.pinv(M) @ y
-plt.clf()
 plt.plot(x, y, 'o')
 plt.plot(x, M @ beta, 'r')
 plt.xlabel('month')
@@ -128,7 +123,6 @@ y = y[i]
 M = np.concatenate([np.ones_like(x), x], axis=1)
 beta = np.linalg.pinv(M) @ y
 
-plt.clf()
 plt.plot(meanTemp, df.hoursFrost, 'o')
 plt.plot(x, np.exp(M @ beta), 'r')
 plt.xlabel('temp')
@@ -166,7 +160,6 @@ i = np.argsort(x, axis=0).reshape(-1)
 x = x[i]
 y = y[i]
 
-plt.clf()
 plt.plot(x, y, 'o')
 plt.xlabel('meanTemp')
 plt.ylabel('hoursFrost')
@@ -186,7 +179,6 @@ phi = np.pi/4 # phase parameter
 y   = a * np.cos(x+phi)            # generate data using cosine model
 y   = y + np.random.randn(len(y),1)  # add noise
 
-plt.clf()
 plt.plot(x, y, 'o')
 
 # the trick:
