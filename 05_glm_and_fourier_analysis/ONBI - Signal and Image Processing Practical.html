@@ -36,18 +36,21 @@
 </p><p>Generate a cosine signal with given magnitude, frequency, sampling
   rate, and duration:
 
-</p><pre>  mag  = 2;     % magnitude (arbitrary units)
-  freq = 5;     % frequency in Hz
-  samp = 100;   % sampling rate in Hz
+</p><pre>  
+import numpy as np
+import matplotlib.pylab as plt
 
-  t        = 0:1/samp:1;  % time (1s of data)
-  t        = t(1:end-1);  % remove last time point
-  N        = length(t);   % store the number of time points
+mag  = 2;     # magnitude (arbitrary units)
+freq = 5;     # frequency in Hz
+samp = 100;   # sampling rate in Hz
 
-  x = mag*cos(2*pi*freq*t);    % the signal equation
-  figure
-  plot(t,x,'.-');
+t = np.arange(0.0,1.0,1.0/samp)  # time (1s of data)
+t = t[0:-1]                      # remove last time point
+N = len(t)                       # store the number of time points
 
+x = mag*np.cos(2*np.pi*freq*t)   # the signal equation
+plt.plot(t,x,'.-')
+plt.show()
 </pre>
 <p>If you run the code above, you can see a nice cosine function. Make
   sure you understand the distinction between the sampling rate (in
@@ -66,20 +69,21 @@
 </p><p>Now, let us immediately look at the Fourier transform
   of this signal.
 
-</p><pre>  y  = fft(x);             % do Fast Fourier Transform
-  f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+</p><pre>  
+y = np.fft.fft(x);                  # do Fast Fourier Transform
+f = np.linspace(0.0,N-1.0,N);   # vector of frequencies for plotting
 
-  figure
-  plot(f,abs(y),'.-');     % plotting the magnitude of the FFT
-
+plt.plot(f,np.abs(y),'.-');      # plotting the magnitude of the FFT
+plt.show()
 </pre>
 <p>This plot is called a <b>powerspectrum</b>. The first peak coincides with the frequency of the cosine
 function (check this). The second peak is redundant (for mathematical
 reasons). Therefore, from now on we will only display the first half of
 the fourier transform:
-</p><pre>  figure
-  plot(f(1:N/2),abs(y(1:N/2)));  % plotting half of the fft results
-  xlabel('Freq (Hz)');           % labelling x-axis
+</p><pre>  
+plt.plot(f[:N//2],np.abs(y[:N//2])) # plotting half of the fft results
+plt.xlabel('Freq (Hz)')           # labelling x-axis
+plt.show()
 </pre>
 <p>Notice how the peak of the powerspectrum corresponds exactly to the
   frequency of the original signal. Now what happens to the
@@ -99,16 +103,19 @@ the fourier transform:
     tells us that the sum of squares of the signal equals the mean of
     squares of its Fourier transform. You can verify this by
     comparing:
-      </p><pre>	sum(x.^2)
-	mean(abs(y).^2)
+      </p><pre>	
+print(np.sum(x**2))
+print(np.mean(np.abs(y)**2))
       </pre>
     <p>Another important and interesting property is that the
     zero-frequency value of the Fourier transform corresponds to the
     sum of the original signal. You can verify this by adding a
     constant to the cosine signal that you have generated:
-      </p><pre>	x2 = x+3;
-	y  = fft(x2);
-	figure, plot(f(1:N/2),abs(y(1:N/2)),'.-');
+      </p><pre>	
+x2 = x+3
+y  = np.fft.fft(x2)
+plt.plot(f[:N//2],np.abs(y[:N//2]),'.-')
+plt.show()
       </pre>
       <p>You can see that y(1)=sum(x2)=300.
   </p></div> 
@@ -117,10 +124,12 @@ the fourier transform:
 <span class="clickme" onclick="showIt(&#39;ans3&#39;)">Answer</span> 
   <div id="ans3" class="answer" style="display: none"> 
     <p>The peak of the powerspectrum does not move in this case:
-    </p><pre>      phase = 2*pi*10; 
-      x2    = mag*cos(2*pi*freq*t+phase);
-      y  = fft(x2);
-      figure, plot(f(1:N/2),abs(y(1:N/2)),'.-');      
+    </p><pre>
+phase = 2*np.pi*10
+x2    = mag*np.cos(2*np.pi*freq*t+phase)
+y = np.fft.fft(x2)
+plt.plot(f[:N//2],np.abs(y[:N//2]),'.-')
+plt.show()
     </pre>
       <p>However, in general the result of an FFT is a complex signal,
       with both amplitude and phase. Whilst the amplitude of the FFT
@@ -148,22 +157,24 @@ the fourier transform:
   phase, and we will look at the inverse fourier
   transform of these:
 
-</p><pre>  mag = zeros(1,100);
-  mag(3)=1;        % spike in the magnitude at freq=3
-  mag(5)=.3;       % spike in the magnitude at freq=5
+</p><pre>  
+mag = np.zeros(100)
+mag[3] = 1        # spike in the magnitude at freq=3
+mag[5] = .3       # spike in the magnitude at freq=5
 
-  ph=zeros(1,100); % zero phase throughout
+ph = np.zeros(100) # zero phase throughout
 
-  y = mag.*exp(1i*ph);  % the complex signal (fft of some real signal)
-  x = ifft(y);          % the inverse fft (x is in general complex too)
-  x = real(x);          % here we imagine that we can "measure" the real part of x
+y = mag*np.exp(1j*ph)  # the complex signal (fft of some real signal)
+x = np.fft.ifft(y)         # the inverse fft (x is in general complex too)
+x = np.real(x)         # here we imagine that we can "measure" the real part of x
 
-  z = ifft(mag);        % here we just use the magnitude to do the ifft
-  z = real(z);
+z = np.fft.ifft(mag)       # here we just use the magnitude to do the ifft
+z = np.real(z)
 
-  figure,hold on
-  plot(x,'.-r')   % plot the real part of the signal
-  plot(z,'.-b')   % plot the ifft of the magnitude
+plt.plot(x,'.-r')   # plot the real part of the signal
+plt.plot(z,'.-b')   # plot the ifft of the magnitude
+plt.show()
+
 </pre>
 <p>To clarify, in the above I've
   used <code>y=mag.*exp(1i*ph)</code>. This is how you write a complex
@@ -190,23 +201,24 @@ the fourier transform:
 <span class="clickme" onclick="showIt(&#39;ans5&#39;)">Answer</span> 
   <div id="ans5" class="answer" style="display: none"> 
     <p>An exponential decay with given decay rate:
-      </p><pre>	mag = 2;      % magnitude (arbitrary units)
-	dec = .3;     % decay rate (in seconds)
-	samp = 100;   % sampling rate in Hz
+      </p><pre>	
+mag = 2      # magnitude (arbitrary units)
+dec = .3     # decay rate (in seconds)
+samp = 100   # sampling rate in Hz
 
-	t        = 0:1/samp:1;  % time (1s of data)
-	t        = t(1:end-1);  % remove last time point
-	N        = length(t);   % store the number of time points
+t = np.arange(0.0,1.0,1/samp)  # time (1s of data)
+t = t[:-1]                     # remove last time point
+N = len(t)                     # store the number of time points
 
-	x = mag*exp(-t/dec);    % the signal equation
-	figure
-	plot(t,x,'.-');
+x = mag*np.exp(-t/dec)         # the signal equation
+plt.plot(t,x,'.-')
+plt.show()
 
-	y  = fft(x);           % do Fast Fourier Transform
-	f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+y = np.fft.fft(x)             # do Fast Fourier Transform
+f = np.linspace(0,N-1,N)  # vector of frequencies for plotting
 
-	figure
-	plot(f(1:N/2),abs(y(1:N/2)),'.-');  % plot powerspectrum
+plt.plot(f[:N//2],np.abs(y[:N//2]),'.-')  # plot powerspectrum
+plt.show()
 
       </pre>      
     <p>Try changing the decay rate and notice an interesting fact: the
@@ -222,28 +234,29 @@ the fourier transform:
   <div id="ans6" class="answer" style="display: none"> 
     <p>The relevant parameter of a delta function is the location of
     the peak. We call it t0 below:
-      </p><pre>	mag = 2;      % magnitude (arbitrary units)
-	t0  = .3;     % peak location (in seconds)
-	samp = 100;   % sampling rate in Hz
+      </p><pre>	
+mag = 2      # magnitude (arbitrary units)
+t0  = .3     # peak location (in seconds)
+samp = 100   # sampling rate in Hz
 
-	t        = 0:1/samp:1;  % time (1s of data)
-	t        = t(1:end-1);  % remove last time point
-	N        = length(t);   % store the number of time points
+t = np.arange(0.0,1.0,1.0/samp)  # time (1s of data)
+t = t[:-1]                       # remove last time point
+N = len(t)                       # store the number of time points
 
-	x                   = zeros(1,N);     % signal
-	x(1+round(samp*t0)) = mag;
+x = np.zeros(N)              # signal
+x[np.round(samp*t0).astype(int)] = mag
 
-	figure
-	plot(t,x,'.-');
+plt.plot(t,x,'.-');
+plt.show()
 
-	y  = fft(x);           % do Fast Fourier Transform
-	f  = linspace(0,N-1,N);  % vector of frequencies for plotting
+y = np.fft.fft(x);             # do Fast Fourier Transform
+f = np.linspace(0,N-1,N);  # vector of frequencies for plotting
 
-	figure
-	plot(f(1:N/2),abs(y(1:N/2)),'.-');            % plot powerspectrum
-	figure
-	plot(f(1:N/2),unwrap(angle(y(1:N/2))),'.-');  % plot unwrapped phase of FFT
+plt.plot(f[:N//2],np.abs(y[:N//2]),'.-')            # plot powerspectrum
+plt.show()
 
+plt.plot(f[:N//2],np.unwrap(np.angle(y[:N//2])),'.-')  # plot unwrapped phase of FFT
+plt.show()
       </pre>      
     <p>The first thing to notice about the delta function is that the
     powerspectrum is flat. This is an extreme case of the uncertainty
@@ -268,18 +281,27 @@ the fourier transform:
   <div id="ans7" class="answer" style="display: none"> 
     <p>Let's start by generating some random noise and looking at the
     FFT (let's not bother this time with units):
-      </p><pre>	x = randn(1,1000);
-	y = fft(x);
-	figure, plot(x)
-	figure, plot(abs(y(1:500)));
+      </p><pre>	
+x = np.random.randn(1000)
+y = np.fft.fft(x)
+
+plt.plot(x)
+plt.show()
+plt.plot(np.abs(y[:500]))
+plt.show()
       </pre>
     <p>The powerspectrum is noisy, but flat. Now let's apply some
     smoothing:
-      </p><pre>	x = randn(1,1000);
-	x = smooth(x,10);  % try changing the second entry
-	y = fft(x);
-	figure, plot(x)
-	figure, plot(abs(y(1:500)));     	
+      </p><pre>	
+x = np.random.randn(1000)
+
+span = 10  # try changing this
+x = np.convolve(x, np.ones((span,))/span, mode='valid')
+y = np.fft.fft(x)
+plt.plot(x)
+plt.show()
+plt.plot(np.abs(y[:500]))
+plt.show()
       </pre>
     <p>More smoothing changes the powerspectrum from being flat to
     having a peak at zero frequency. This is called "coloured" noise,
@@ -300,23 +322,25 @@ the fourier transform:
   signal, then calculate its FFT, then invert that transform and plot
   the result. (here the original signal has a phase, i.e. at t=0 it is
   not equal to 1):
-</p><pre>  mag  = 2;     % magnitude (arbitrary units)
-  freq = 5;     % frequency in Hz
-  samp = 100;   % sampling rate in Hz
+</p><pre>  
+mag  = 2;     # magnitude (arbitrary units)
+freq = 5;     # frequency in Hz
+samp = 100;   # sampling rate in Hz
 
-  t        = 0:1/samp:1;  % time (1s of data)
-  t        = t(1:end-1);  % remove last time point
-  N        = length(t);   % store the number of time points
+t = np.arange(0,1,1/samp)  # time (1s of data)
+t = t[:-1]                 # remove last time point
+N = len(t)                 # store the number of time points
 
-  x = mag*cos(2*pi*freq*t + 10);    % the signal equation (+phase)
-  figure
-  plot(t,x,'.-');
+x = mag*np.cos(2*np.pi*freq*t + 10)    # the signal equation (+phase)
+plt.plot(t,x,'.-')
+plt.show()
 
-  y  = fft(x);           % do Fast Fourier Transform
-  z  = ifft(y);
+y  = np.fft.fft(x)           # do Fast Fourier Transform
+z  = np.fft.ifft(y)
 
-  hold on, 
-  plot(t,z,'r--');
+plt.plot(t,x,'.-')
+plt.plot(t,z,'r--')
+plt.show()
 </pre>
 <p>The <code>ifft</code> simply gives us the original signal back. Now let us try a few
   experiments. What happens if we:
@@ -326,10 +350,13 @@ the fourier transform:
   <div id="ans8" class="answer" style="display: none"> 
     <p>In this case, the reconstructed signal looks like the original
     signal but shifted.
-      </p><pre>	y2 = abs(y);
-	z  = ifft(y2);
-	figure,hold on
-	plot(t,x),plot(t,z,'r--');
+      </p><pre>	
+y2 = np.abs(y)
+z  = np.fft.ifft(y2)
+
+plt.plot(t,x)
+plt.plot(t,z,'r--')
+plt.show()
       </pre>
   </div>
 </li><li> Remove the magnitude information prior to ifft?
@@ -340,10 +367,12 @@ the fourier transform:
     periodic signals. In the case where a signal contains interesting
     features (e.g. transitions), the phase part of the FFT is more
     important than the magnitude.
-      </p><pre>	y2 = exp(1i*angle(y));
-	z  = ifft(y2);
-	figure,hold on
-	plot(t,x),plot(t,z,'r--');
+      </p><pre>	
+y2 = np.exp(1j*np.angle(y))
+z  = np.fft.ifft(y2)
+plt.plot(t,x)
+plt.plot(t,z,'r--')
+plt.show()
       </pre>
   </div>
 
@@ -353,13 +382,18 @@ the fourier transform:
   <div id="ans10" class="answer" style="display: none"> 
     <p>Let's try a few things: add spikes in the phase, spikes in the
     magnitude, delete points from either.
-      </p><pre>	mag = abs(y);   mag(20) = 10; % spike in magnitude
-	ph  = angle(y); ph(10)  = 1;  % spike in phase
+      </p><pre>	
+mag = np.abs(y)
+mag[20] = 10   # spike in magnitude
+ph = np.angle(y)
+ph[10]  = 1    # spike in phase
 
-	y2 = mag.*exp(1i*ph);
-	z  = real(ifft(y2));
-	figure,hold on
-	plot(t,x),plot(t,z,'r--');
+y2 = mag*np.exp(1j*ph)
+z  = np.real(np.fft.ifft(y2))
+plt.plot(t,x)
+plt.plot(t,z,'r--')
+plt.show()
+
       </pre>
     <p>Play a bit with the above. You notice that spikes in the
     magnitude can introduce quite nasty effects (extra oscillations). 
@@ -377,16 +411,20 @@ the fourier transform:
 </p><p>Start by looking at the
   powerspectrum of the data (the sampling rate for this data was
   128Hz). 
-</p><pre>  load('eeg.mat');
+</p><pre>  
+import scipy.io
 
-  samp = 128;                 % sampling rate in Hz
-  T    = 1/samp*length(eeg);  % total duration (in seconds)
-  
-  N    = length(eeg);          % store the number of time points
-  f    = linspace(0,N-1,N)/T;  % vector of frequencies for plotting
+eeg = scipy.io.loadmat('eeg.mat')['eeg'].reshape(-1)
 
-  y = fft(eeg);
-  plot(f(1:N/2),abs(y(1:N/2)));
+samp = 128                 # sampling rate in Hz
+T    = 1/samp*len(eeg)     # total duration (in seconds)
+
+N    = len(eeg)            # store the number of time points
+f    = np.linspace(0,N-1,N)/T  # vector of frequencies for plotting
+
+y = np.fft.fft(eeg)
+plt.plot(f[:N//2],np.abs(y[:N//2]))
+plt.show()
 </pre>
 <p>Note how we divide by the total duration to get the frequencies. We
   didn't do that before because we generated 1 second of data. 
@@ -394,26 +432,30 @@ the fourier transform:
   contamination from the mains (the current that comes from the wall).
 </p><p>Now let's do a "sliding window" FFT, i.e. do an FFT for small time
   windows and display the results as a time-by-frequency plot:
-</p><pre>  window = 1;            % 1 second window
-  nbins  = window*samp;  % corresponding number of time points
+</p><pre>  
+window = 1;            # 1 second window
+nbins  = window*samp;  # corresponding number of time points
+print(nbins)
 
-  F = zeros(nbins/2,length(1:N-nbins));
+F = np.zeros((nbins//2,N-nbins))
+print(F.shape)
 
-  for i=1:N-nbins
-    x = eeg(i:i+nbins-1);
-    y = fft(x);
-    F(:,k) = abs(y(1:nbins/2));  % only keep half of the fft  
-  end  
+for i in range(N-nbins):
+    x = eeg[i:i+nbins]
+    y = np.fft.fft(x)
+    F[:,i] = np.abs(y[:nbins//2])  # only keep half of the fft
 </pre>
 <p>Now plot the resulting spectrum using <code>imagesc</code>:
-</p><pre>  figure,hold on
-  imagesc(log1p(F)); 
+</p><pre>  
+plt.imshow(np.log1p(F), aspect='auto')
+plt.yticks(ticks=np.arange(1,nbins/2,4), labels=np.arange(0,nbins/2-1,4))
+plt.xlabel('time')
+plt.show()
+
 </pre>
 <p>We used a log transform to better see the colours and
-  patterns. Now let's add the frequency axis and time label:
-</p><pre>  set(gca,'ytick',1:4:nbins/2,'yticklabel',num2str((0:4:nbins/2-1)'/window));
-  xlabel('time')
-</pre>
+  patterns.
+</p>
 <p>You should be able to see several features. First, the constant
   60Hz signal (the mains). Second, most of the power is in the low
   frequencies (which is what you should have seen in the overall
@@ -441,15 +483,16 @@ the fourier transform:
 
 </p><p>Create an image using a single spike in the magnitude and the
   function <code>ifft2</code>:
-</p><pre>  mag=zeros(100,100);  % magnitude (all zeros for now)
-  ph=zeros(100,100);   % phase (all zeros for now)
+</p><pre>  
+mag = np.zeros((100,100))  # magnitude (all zeros for now)
+ph = np.zeros((100,100))   # phase (all zeros for now)
 
-  mag(2,3)=1;          % 1 cycle in x, 2 cycles in y
+mag[1,2] = 1               # 1 cycle in x, 2 cycles in y
 
-  y=mag.*exp(1i*ph);   % build fft combining mag and phase
-  x=real(ifft2(y));    % inverse fft (then take real part)
-  imagesc(x)           % plot
-
+y = mag*np.exp(1j*ph)           # build fft combining mag and phase
+x = np.real(np.fft.ifft2(y))    # inverse fft (then take real part)
+plt.imshow(x)                   # plot
+plt.show()
 </pre>
 <p>This needs some explaining. First, we've created a magnitude of 1
   using mag(2,3)=1. Think of (2,3) as the 2nd and 3rd frequencies
@@ -458,10 +501,11 @@ the fourier transform:
 </p><p>You should be able to clearly see a periodic pattern that contains
   1 cycle along x and 2 cycles along y. You can see that even more
   clearly by plotting a row or a column of x:
-</p><pre>  figure,hold on
-  plot(x(:,1));
-  plot(x(1,:),'r');
-  legend({'x axis','y axis'});
+</p><pre>  
+plt.plot(x[:,0])
+plt.plot(x[0,:], 'r')
+plt.legend(['x axis','y axis'])
+plt.show()
 </pre>
 
 <p>Now move the amplitude spike to different locations
@@ -477,26 +521,32 @@ the fourier transform:
 Download a picture of a cat from
   here: <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/cat.jpg">CAT</a>. Display
   the image. 
-</p><pre>  im = imread('cat.jpg');
-  im = im(:,:,1);  % only keep one colour channel
+</p><pre>  
+import skimage as ski
+import skimage.io
 
-  figure, imshow(im)
+im = ski.io.imread('cat.jpg')  # read image
+im = im[:,:,1]  # only keep one colour channel
+
+plt.imshow(im)
+plt.show()
 </pre>
 
 <p>Beautiful no? Now let's look at its FFT (both the magnitude and phase):
 
-  </p><pre>    y=fft2(im);
+  </p><pre>    
+y = np.fft.fft2(im)
 
-    clim=quantile(abs(y(:)),[.01 .99]);
-    figure
-    imagesc(fftshift(abs(y)),clim);colormap gray
-    title('magnitude');
+clim = np.quantile(np.abs(y.reshape(-1)), [.01, .99])
+plt.imshow(np.fft.fftshift(np.abs(y)), vmin=clim[0], vmax=clim[1])
+plt.gray()
+plt.title('magnitude')
+plt.show()
 
-    clim=quantile(angle(y(:)),[.01 .99]);
-    figure
-    imagesc(fftshift(angle(y)),clim);colormap gray
-    title('phase')
-
+clim = np.quantile(np.angle(y.reshape(-1)), [.01, .99])
+plt.imshow(np.fft.fftshift(np.angle(y)), vmin=clim[0], vmax=clim[1])
+plt.title('phase')
+plt.show()
 </pre>
 <p>Now not so beautiful hey? Ok, first make sure you understand the
   code above. We used <code>fftshift</code>. That is because of the
@@ -518,23 +568,29 @@ Download a picture of a cat from
 <li>We only use the magnitude?
 <span class="clickme" onclick="showIt(&#39;ans11&#39;)">Answer</span> 
 <div id="ans11" class="answer" style="display: none"> 
-  <pre>    mag = abs(y);
-    x   = ifft2(mag);
-    figure,imagesc(real(x));   
+  <pre>    
+mag = np.abs(y)
+x   = np.fft.ifft2(mag)
+plt.imshow(np.real(x))
+plt.show()
   </pre>
   <p>doesn't look very good. Let's use the quantiles for display:
-    </p><pre>      clim=quantile(real(x(:)),[0.01 0.99]);
-      imagesc(x,clim);
+    </p><pre>      
+clim = np.quantile(np.real(x.reshape(-1)), [0.01, 0.99])
+plt.imshow(np.real(x), vmin=clim[0], vmax=clim[1])
+plt.show()
     </pre>
   <p>hmm, definitely doesn't look like a cat...
 </p></div>
 </li><li>We only use the phase?
 <span class="clickme" onclick="showIt(&#39;ans12&#39;)">Answer</span> 
 <div id="ans12" class="answer" style="display: none"> 
-  <pre>    ph = angle(y);
-    x   = ifft2(exp(1i*ph));
-    clim=quantile(real(x(:)),[0.01 0.99]);
-    figure,imagesc(real(x),clim);   
+  <pre>
+ph = np.angle(y)
+x   = np.fft.ifft2(np.exp(1j*ph))
+clim = np.quantile(np.real(x.reshape(-1)), [0.01, 0.99])
+plt.imshow(np.real(x), vmin=clim[0], vmax=clim[1])
+plt.show()
   </pre>
   <p>Looks like a cat! Well, not as nice as the original, but better
   than just reconstructing the magnitude. This is because the
@@ -549,18 +605,22 @@ Download a picture of a cat from
  <span class="clickme" onclick="showIt(&#39;ans13&#39;)">Answer</span> 
 <div id="ans13" class="answer" style="display: none"> 
   <p>Let's cut the centre of the fft by first building a box:
-    </p><pre>      siz = [5 5]  % size of the box
-      box = ones(size(im));
-      box(200-siz(1):200+siz(1),300-siz(2):300+siz(2)) = 0;
-      figure,imagesc(box);
+    </p><pre>
+siz = [5, 5]  # size of the box
+box = np.ones_like(im)
+box[200-siz[0]:200+siz[0],300-siz[1]:300+siz[1]] = 0
+plt.imshow(box)
+plt.show()
     </pre>
   <p>Now we multiply the box by the fft of the original image and run
   ifft2. (note: we need to use fftshift to make sure the zero
   frequencies are in the centre of the image).
-    </p><pre>      y = fftshift(fft2(im));
-      y = y.*box;
-      x = ifft2(y);
-      figure, imshow(real(x));
+    </p><pre>
+y = np.fft.fftshift(np.fft.fft2(im))
+y = y*box
+x = np.fft.ifft2(y)
+plt.imshow(np.real(x))
+plt.show()
     </pre>
   <p>As you can see, it looks like we only end up with the edges of the
   original image. That is because we have removed the low frequencies
@@ -571,11 +631,13 @@ Download a picture of a cat from
 <div id="ans14" class="answer" style="display: none"> 
   <p>We can use the previous box, and simply turn zeros to ones and
   ones to zeros:
-    </p><pre>      box = ~box; % this turns zeros to ones and ones to zeros
-      y = fftshift(fft2(im));
-      y = y.*box;
-      x = ifft2(y);
-      figure, imshow(real(x));      
+    </p><pre>
+box = np.logical_not(box).astype(int) # this turns zeros to ones and ones to zeros
+y = np.fft.fftshift(np.fft.fft2(im))
+y = y*box
+x = np.fft.ifft2(y)
+plt.imshow(np.real(x))
+plt.show()
     </pre>
     <p>This time, we have removed the high frequencies. The image
     looks a lot smoother.  Try with several box sizes.
@@ -622,18 +684,18 @@ Download a picture of a cat from
   two cosine functions. We will simulate this signal at high sampling
   rate (as if it was continuous), and see what happens when we downsample it. Begin by
   generating the signal:
-</p><pre>  freq1 = 5;      % freq in Hz
-  freq2 = 1;      % freq in Hz
-  samp  = 1000;   % sampling rate in Hz
+</p><pre>  
+freq1 = 5.0      # freq in Hz
+freq2 = 1.0      # freq in Hz
+samp  = 1000.0   # sampling rate in Hz
 
-  t        = 0:1/samp:1;  % time (1s of data)
-  t        = t(1:end-1);  % remove last time point
-  N        = length(t);   % store the number of time points
+t = np.arange(0,1,1/samp)  # time (1s of data)
+t = t[0:-1]                # remove last time point
+N = len(t)                 # store the number of time points
 
-  x = cos(2*pi*freq1*t) + .5*cos(2*pi*freq2*t);    % the signal equation
-  figure
-  plot(t,x,'.-');
-
+x = np.cos(2*np.pi*freq1*t) + .5*np.cos(2*np.pi*freq2*t)    # the signal equation
+plt.plot(t,x,'.-')
+plt.show()
 </pre>
 
 <p>Now remember: this signal is assumed by matlab to be periodic, so
@@ -643,21 +705,21 @@ Download a picture of a cat from
 
 </p><p>Let's see what happens when we take subsamples from this signal
   (make sure you understand all the code below):
-</p><pre>  F = 50;    % sub-sampling frequency (Hz)
-  T = 1/F;   % sub-sampling period (sec)
-  n = N*T;   % sub-sampling period (in samples)
+</p><pre>  
+F = 50.0         # sub-sampling frequency (Hz)
+T = 1/F          # sub-sampling period (sec)
+n = int(N*T)     # sub-sampling period (in samples)
 
-  z = x(1:n:end);    % sub-sampled signal
-  y = fft(z);        % fft of sub-sampled signal
+z = x[::n]         # sub-sampled signal
+y = np.fft.fft(z)  # fft of sub-sampled signal
 
-  subN = length(z);  % length of sub-sampled signal
+subN = len(z)  # length of sub-sampled signal
 
 
-  f  = linspace(0,subN-1,subN);  % vector of frequencies for plotting
+f = np.linspace(0,subN-1,subN)  # vector of frequencies for plotting
 
-  figure
-  plot(f(1:subN/2),abs(y(1:subN/2))) % plot powerspectrum as before
-
+plt.plot(f[:subN//2], np.abs(y[:subN//2])) # plot powerspectrum as before
+plt.show()
 </pre>
 <p>Now change the frequency of sub-sampling and see what happens to
   the fourier transform. You should be able to see that as soon as you
@@ -667,32 +729,35 @@ Download a picture of a cat from
  <span class="clickme" onclick="showIt(&#39;ans15&#39;)">Example</span> 
 </p><div id="ans15" class="answer" style="display: none"> 
   <p>First generate the (almost) continuous mixture of two cosines:
-  </p><pre>    freq1 = 5;      % freq in Hz
-    freq2 = 1;      % freq in Hz
-    samp  = 1000;   % sampling rate in Hz
+  </p><pre>
+freq1 = 5.0      # freq in Hz
+freq2 = 1.0      # freq in Hz
+samp  = 1000.0   # sampling rate in Hz
 
-    t        = 0:1/samp:1;  % time (1s of data)
-    t        = t(1:end-1);  % remove last time point
-    N        = length(t);   % store the number of time points
+t = np.arange(0,1,1/samp)  # time (1s of data)
+t = t[:-1]                 # remove last time point
+N = len(t)                 # store the number of time points
 
-    x = cos(2*pi*freq1*t) + .5*cos(2*pi*freq2*t);    % the signal equation
-    figure
-    plot(t,x,'.-');
+x = np.cos(2*np.pi*freq1*t) + .5*np.cos(2*np.pi*freq2*t)    # the signal equation
+plt.plot(t,x,'.-')
   </pre>
   <p>Next sub-sample the signal and calculate the FFT of the
   sub-sampled signal:
-    </p><pre>      F = 50;    % sub-sampling frequency (Hz)
-      T = 1/F;  % sub-sampling period (sec)
-      n = N*T;  % sub-sampling perior (in samples)
+    </p><pre>
+F = 50.0         # sub-sampling frequency (Hz)
+T = 1/F          # sub-sampling period (sec)
+n = int(N*T)     # sub-sampling perior (in samples)
 
-      z = x(1:n:end); % sub-sampled signal
-      y = fft(z);
+z = x[::n]  # sub-sampled signal
+t = t[::n]
+y = np.fft.fft(z)
     </pre>
   <p>
     Now reconstruct the signal from its FFT and plot:
-    </p><pre>      w = ifft(y);  
-      hold on
-      plot(t,w,'r--');
+    </p><pre>
+w = np.fft.ifft(y)
+plt.plot(t,w,'r--')
+plt.show()
     </pre>
   <p>The reconstructed signal looks very similar to the original
   one. Try now with lower sampling frequency and notice that things
@@ -704,16 +769,19 @@ Download a picture of a cat from
   far: <b>zero padding</b>. We will use the 2D FFT and the cat example
   to get an understanding of zero padding. First load the image and
   downsample it by removing every other pixel:
-  </p><pre>  im=imread('cat.jpg');
-  x=im(1:2:end,1:2:end,1);  
-  figure
-  imshow(x)
+  </p><pre>  
+im = ski.io.imread('cat.jpg')
+x = im[::2,::2,0]
+plt.imshow(x)
+plt.show()
 </pre>
 <p>Now let's look at the FFT of this image:
-</p><pre>  y=fft2(x);
-  clim=quantile(abs(y(:)),[.01 .99]);
-  figure
-  imagesc(fftshift(abs(y)),clim);colormap gray
+</p><pre>  
+y = np.fft.fft2(x)
+clim = np.quantile(np.abs(y.reshape(-1)),[.01, .99])
+plt.imshow(np.fft.fftshift(np.abs(y)), vmin=clim[0], vmax=clim[1])
+plt.gray()
+plt.show()
 </pre>
 
 <p>Now let us recall the sampling pictures that we showed above. They
@@ -728,10 +796,12 @@ Download a picture of a cat from
   image at higher resolution than the frequency domain allows us to,
   and is closely related to the concept of interpolation. 
 </p><p>Let's see what the zero padded inverse FFT of the cat looks like:
-  </p><pre>    y = fftshift(y); % we need this before zero padding
-    z = ifft2(y,size(im,1),size(im,2)); % zero padded ifft
-    clim=quantile(abs(z(:)),[.01 .99]);
-    figure,imshow(abs(z),clim);colormap gray
+  </p><pre>    
+y = np.fft.fftshift(y) # we need this before zero padding
+z = np.fft.ifft2(y, s=x.shape) # zero padded ifft
+clim = np.quantile(np.abs(z.reshape(-1)), [.01, .99])
+plt.imshow(np.abs(z), vmin=clim[0], vmax=clim[1])
+plt.show()
   </pre>
 
 <p>Compare to the original image, you should notice strange patterns
@@ -751,24 +821,26 @@ Download a picture of a cat from
   the cat image if you haven't done that yet. 
 </p><p>Now let's create a "moving average" filter (also called the mean filter). This means a box that
   we are going to run through the image and take local averages. 
-</p><pre>  siz = [3 3];   % 3x3 box. You can play with changing this
-  box = ones(siz)/9;
+</p><pre>  
+
+siz = [3, 3]   # 3x3 box. You can play with changing this
+box = np.ones(siz)/9
 </pre>
 <p>Now we could create a loop through all the image and for each pixel
   of the image replace the value by the weighted average within the
   small box. Instead, we are going to do this via a Fourier
   transform. First, let's calculate the Fourier transform of the image
   and the filter:
-</p><pre>  x=im(:,:,1);
-  y=fft2(x);
+</p><pre>  
+x = im[:,:,0]
+y = np.fft.fft2(x)
 
-  f=fft2(box,size(x,1),size(x,2));  % use zeropadding
-  
-  z=ifft2(y.*f);  % inverse FFT of the product
+f = np.fft.fft2(box, s=x.shape)  # use zeropadding
 
-  figure,
-  clim=quantile(abs(z(:)),[.01 .99]);
-  imagesc(abs(z),clim);colormap gray
+z = np.fft.ifft2(y*f)  # inverse FFT of the product
+
+clim = np.quantile(np.abs(z.reshape(-1)), [.01, .99])
+plt.imshow(np.abs(z), vmin=clim[0], vmax=clim[1])
 </pre>
 <p>Beautifully simple no? Imagine doing this with a loop, and having
   to worry about the edges of the image etc.  The effect of a moving
@@ -784,36 +856,36 @@ Download a picture of a cat from
  <span class="clickme" onclick="showIt(&#39;ans16&#39;)">answer</span> 
 </p><div id="ans16" class="answer" style="display: none">   
   <p>Let's first create the Gaussian box:
-  </p><pre>    gauss = zeros(15,15);   % size of the filter can be changed
+  </p><pre>
+gauss = np.zeros((15,15))   # size of the filter can be changed
 
-    sigma  = 10;             % sigma of the Gaussian (in pixels)
-    centre = [size(gauss,1)/2 size(gauss,2)/2]; % centre of the box
+sigma  = 10             # sigma of the Gaussian (in pixels)
+centre = np.array(gauss.shape)//2 # centre of the box
 
-    for i=1:size(gauss,1)
-     for j=1:size(gauss,2)
-      gauss(i,j) = exp(- sum(([i j]-centre).^2)/2/sigma^2 );
-     end
-    end
-    gauss = gauss/sum(gauss(:));
+for i in range(gauss.shape[0]):
+    for j in range(gauss.shape[1]):
+        gauss[i,j] = np.exp(- np.sum(([i, j]-centre)**2)/2/sigma**2 )
+gauss = gauss/np.sum(gauss)
   </pre>
   <p>Plot the Gaussian box (also called kernel) to see what it looks
   like:
-    </p><pre>      figure;
-      imagesc(gauss);
+    </p><pre>
+plt.imshow(gauss)
+plt.show()
     </pre>
     
   <p>Now convolve it with the cat image using the FFT trick:
     </p><pre>      
-      x=im(:,:,1);
-      y=fft2(x);
+x = im[:,:,0]
+y = np.fft.fft2(x)
 
-      f=fft2(gauss,size(x,1),size(x,2));  % use zeropadding
-      
-      z=ifft2(y.*f);  % inverse FFT of the product
+f = np.fft.fft2(gauss, s=x.shape)  # use zeropadding
 
-      figure,
-      clim=quantile(abs(z(:)),[.01 .99]);
-      imagesc(abs(z),clim);colormap gray
+z = np.fft.ifft2(y*f)  # inverse FFT of the product
+
+clim = np.quantile(np.abs(z.reshape(-1)), [.01, .99])
+plt.imshow(np.abs(z), vmin=clim[0], vmax=clim[1])
+plt.show()
     </pre>
 </div>
 <p>Try to use the Gaussian filter to denoise the cat image (add some
@@ -825,24 +897,28 @@ Download a picture of a cat from
   discrete terms is
   simply the difference between adjacent pixels. 
 </p><p>Here are simple finite difference filters:
-</p><pre>  box = [-1 1];    % along x-dimension
-  box = [-1;1];    % along y-dimension
-  box = [-1 0 1];  % a slightly better filter along x
-  box = [-1;0;1];  % a slightly better filter along y
-
+</p><pre>
+box = [[-1, 1]]    # along x-dimension
+box = [[-1],
+       [ 1]]    # along y-dimension
+box = [[-1, 0, 1]]  # a slightly better filter along x
+box = [[-1],
+       [ 0],
+       [ 1]]  # a slightly better filter along y
 </pre>
 <p>Now let's apply these filters to the cat image:
-</p><pre>  x=im(:,:,1);
-  y=fft2(x);
+</p><pre>
+x = im[:,:,0]
+y = np.fft.fft2(x)
 
-  box = [-1 0 1]; % try with different ones if you have time
-  f=fft2(box,size(x,1),size(x,2));  % use zeropadding
-  
-  z=ifft2(y.*f);  % inverse FFT of the product
+box = [[-1, 0, 1]] # try with different ones if you have time
+f = np.fft.fft2(box, s=x.shape)  # use zeropadding
 
-  figure,
-  clim=quantile(abs(z(:)),[.01 .99]);
-  imagesc(abs(z),clim);colormap gray
+z = np.fft.ifft2(y*f)  # inverse FFT of the product
+
+clim = np.quantile(np.abs(z.reshape(-1)), [.01, .99])
+plt.imshow(np.abs(z), vmin=clim[0], vmax=clim[1])
+plt.show()
 </pre>
 <p>You should be able to see edges along the x-dimension in the image
   (similarly along the y dimension if you used the y-derivative
@@ -890,13 +966,21 @@ Download a picture of a cat from
   and we are going to use the most famous image in medical imaging:
   the Shepp-Logan phantom. This image is so popular that it is
   included in Matlab's imaging toolbox, so let's create it:
-</p><pre>  im=phantom;
-  figure, imagesc(im), colormap gray
+</p><pre>
+import skimage.data
+im = ski.data.shepp_logan_phantom()
+plt.imshow(im)
+plt.gray()
+plt.show()
 </pre>
 
 <p>Let's calculate the Radon transform along a single orientation:
-</p><pre>  R = radon(im,0);
-  figure, plot(R);
+</p><pre>
+import skimage.transform
+
+R = ski.transform.radon(im, [0])
+plt.plot(R)
+plt.show()
 </pre>
 <p>The above simply sums the values inside the phatom along lines that
   are parallel to the x-axis. You can see that by comparing R to
@@ -905,13 +989,17 @@ Download a picture of a cat from
   spans a wider number of pixels in the image.
 </p><p>Now let's look at the Radon transform along more angle and plot the
   results:
-</p><pre>  R = radon(im,linspace(0,180,40));   % 40 angles from 0 to 180 degrees
-  figure, imagesc(R);
+</p><pre>
+R = ski.transform.radon(im, np.linspace(0,180,40))   # 40 angles from 0 to 180 degrees
+plt.imshow(R)
+plt.show()
 </pre>
 <p>This funky looking image is your measurement. Now let's calculate
   an inverse Radon transform and see what the object looks like:
-</p><pre>  x = iradon(R,linspace(0,180,40));
-  figure,imagesc(x),colormap gray
+</p><pre>
+x = ski.transform.iradon(R, np.linspace(0,180,40))
+plt.imshow(x)
+plt.show()
 </pre>
 <p>The inverse Radon transfrom is also called back-projection. You can
   clearly see that this back-projection leaves "trails" behind when it
@@ -927,15 +1015,18 @@ Download a picture of a cat from
   introduce a "metal" artefact. This happens when a patient has an
   implant inside their body. We can model that by introducing a spike
   in the original phantom image:
-</p><pre>  im(100,80)=100; 
+</p><pre>
+im[100,80] = 100
 </pre>
 <p>Now run the radon transform (to simulate the measurement process)
   and then the iradon transform (reconstruction of the object from the
   measurements). You should be able to see some striking artefacts
   caused by the simulated metal implan. 
-</p><pre>  R = radon(im,linspace(0,180,100));
-  x = iradon(R,linspace(0,180,100));
-  figure,imagesc(x,[0 1]);colormap gray
+</p><pre> 
+R = ski.transform.radon(im, np.linspace(0,180,100))
+x = ski.transform.iradon(R, np.linspace(0,180,100))
+plt.imshow(x, vmin=0, vmax=1)
+plt.show()
 </pre>
 
 <p>The Radon transform is related to the Fourier transform via
@@ -952,16 +1043,19 @@ Download a picture of a cat from
   Matlab). 
 <span class="clickme" onclick="showIt(&#39;ans17&#39;)">Answer</span> 
 </p><div id="ans17" class="answer" style="display: none">   
-  <pre>    im=phantom;
-    proj = sum(im,1);   % projection on the x axis (along the y axis)
-    f1d  = fft(proj);   % 1D Fourier
-    f2d  = fft2(im);    % 2D Fourier
-    slice = f2d(1,:);   % slice along x (through zero frequency)
-    
-    figure,hold on
-    plot(abs(f1d),'b'); plot(abs(slice),'r--');
-    figure,hold on
-    plot(angle(f1d),'b'); plot(angle(slice),'r--');        
+  <pre> 
+im = ski.data.shepp_logan_phantom()
+proj = np.sum(im,axis=0)   # projection on the x axis (along the y axis)
+f1d  = np.fft.fft(proj)    # 1D Fourier
+f2d  = np.fft.fft2(im)     # 2D Fourier
+xslice = f2d[0,:]   # slice along x (through zero frequency)
+
+plt.plot(np.abs(f1d),'b')
+plt.plot(np.abs(xslice),'r--')
+plt.show()
+plt.plot(np.angle(f1d),'b')
+plt.plot(np.angle(xslice),'r--')
+plt.show()
   </pre>
   
 </div>
@@ -998,11 +1092,13 @@ of an image using the projection-slice theorem and the ifft.
 </p><p>But first, download
   this <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/brain.bmp">brain</a>
   and load it into matlab:
-</p><pre>  im=imread('brain.bmp');  
+</p><pre>
+im = ski.io.imread('brain.bmp')
 </pre>
 <p>Remember that in MRI, we measure the FFT of the object, aka
   k-space. Let's generate a measured k-space data (and also centre k-space using <code>fftshift</code>):
-</p><pre>  data = fftshift(fft2(im));
+</p><pre>
+data = np.fft.fftshift(np.fft.fft2(im))
 </pre>
 
 <h4>Gibb's ringing</h4>
@@ -1012,12 +1108,15 @@ of an image using the projection-slice theorem and the ifft.
   this by "cutting" k-space along one of the two axes, as if we didn't
   have enough time to acquire these data. To exagerate the ringing, we
   will cut quite a lot of the high frequencies:
-</p><pre>  K = data(:,112:112+32-1);   % this turns k-space from 256x256 to 256x32
+</p><pre>
+K = data[:,112:112+32]   # this turns k-space from 256x256 to 256x32
 </pre>
 <p>And now reconstruct the object as a full 256x256 (with zero padding,
   remember?):
-</p><pre>  x = ifft2(K,256,256);
-  figure, imagesc(abs(x));    % we typically look at the magnitude 
+</p><pre>
+x = np.fft.ifft2(K,s=[256,256])
+plt.imshow(np.abs(x))    # we typically look at the magnitude
+plt.show()
 </pre>
 <p>You should be able to see the ringing artefacts along the
   horizontal axis but not the vertical axis.
@@ -1026,18 +1125,22 @@ of an image using the projection-slice theorem and the ifft.
 <p>Ghosting happens when even and odd k-space lines are intensity
   modulated differently. We are going to simulate this by taking every other line in
   k-space and scaling them by 80 percent:
-</p><pre>   K=data;
-   K(1:2:end,:) = 0.8*K(1:2:end,:);
-   x=ifft2(K);
-   figure, imagesc(abs(x));
+</p><pre>
+K = data
+K[::2,:] = 0.8*K[::2,:]
+x = np.fft.ifft2(K)
+plt.imshow(np.abs(x))
+plt.show()
 </pre>
 <p>You can see that the image gets "duplicated" and overlaps with
   itself along the dimension where we did the intensity modulation.  Try along the
   other dimension now:
-</p><pre>   K=data;
-   K(:,1:2:end) = 0.8*K(:,1:2:end);
-   x=ifft2(K);
-   figure, imagesc(abs(x));  
+</p><pre>
+K = data
+K[:,::2] = 0.8*K[:,::2]
+x = np.fft.ifft2(K)
+plt.imshow(np.abs(x))
+plt.show()
 </pre>
 <p>Why does this happen? One way to understand this is to notice that
   modulating every other slice of the k-space data is like taking the
@@ -1056,18 +1159,20 @@ of an image using the projection-slice theorem and the ifft.
   with a time constant called T2* (don't ask why!).
 </p><p>Typically, we acquire k-space, say, from the bottom to the top, so
   we will simulate an intensity drop along that direction:
-</p><pre>  T2star = 20;            % milliseconds
-  Ttotal = 100;           % time it takes to "read" k-space
-  N      = size(data,1);  % number of pixels
+</p><pre>
+T2star = 20            # milliseconds
+Ttotal = 100           # time it takes to "read" k-space
+N      = data.shape[0] # number of pixels
 
-  K = data;
-  for i=1:size(K,2)
-   K(:,i) = K(:,i).*exp(-linspace(0,Ttotal,N)'/T2star);
-  end
+K = data
+for i in range(K.shape[1]):
+    K[:,i] = K[:,i]*np.exp(-np.linspace(0,Ttotal,N)/T2star)
 </pre>
 <p>Now let's reconstruct the object and see what happened:
-</p><pre>  x=ifft2(K);
-  figure,imagesc(abs(x));
+</p><pre>  
+x = np.fft.ifft2(K)
+plt.imshow(np.abs(x))
+plt.show()
 </pre>
 <p>You should be able to see some blurring along the vertical
   axis. The shorter the value of T2* is, the more blurring there is

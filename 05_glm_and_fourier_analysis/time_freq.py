@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pylab as plt
 
 eeg = scipy.io.loadmat('eeg.mat')['eeg'].reshape(-1)
-print(eeg.shape)
 
 samp = 128                 # sampling rate in Hz
 T    = 1/samp*len(eeg)     # total duration (in seconds)

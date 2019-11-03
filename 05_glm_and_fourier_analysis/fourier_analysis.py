@@ -22,10 +22,10 @@ plt.show()
 
 plt.plot(f[:N//2],np.abs(y[:N//2])) # plotting half of the fft results
 plt.xlabel('Freq (Hz)')           # labelling x-axis
-print(np.sum(x**2))
-print(np.mean(np.abs(y)**2))
 plt.show()
 
+print(np.sum(x**2))
+print(np.mean(np.abs(y)**2))
 
 x2 = x+3
 y  = np.fft.fft(x2)
