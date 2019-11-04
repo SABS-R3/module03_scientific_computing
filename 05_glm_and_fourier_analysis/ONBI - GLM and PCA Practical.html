@@ -65,7 +65,6 @@ plt.show()
 M2 = np.concatenate([np.ones((len(x),1)), x], axis=1) # w/ intercept
 </pre>
 <p>Look at M1 and M2 if you are not sure what they should look like
-  (e.g. type M1 in the Matlab command window and press enter).
 </p><p>Now solve the two GLMs:
   </p><pre>beta1 = np.linalg.pinv(M1) @ y
 beta2 = np.linalg.pinv(M2) @ y
@@ -551,7 +550,7 @@ plt.show()
   visualised as a matrix.
 </p><p>First, download the data file
   from <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/world-map.gif">here</a>.
-</p><p>Now open the data in Matlab and visualise it
+</p><p>Now read in the data in Python and visualise it
   with <code>imagesc</code>.
 </p><pre>import skimage as ski
 import skimage.io

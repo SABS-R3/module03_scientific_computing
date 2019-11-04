@@ -176,9 +176,9 @@ plt.plot(z,'.-b')   # plot the ifft of the magnitude
 plt.show()
 </pre>
 <p>To clarify, in the above I've
-  used <code>y=mag.*exp(1i*ph)</code>. This is how you write a complex
+  used <code>y = mag*np.exp(1j*ph)</code>. This is how you write a complex
   number given its magnitude and phase (an alternative is to use the
-  real and imaginary parts). The notation <code>1i</code> is Matlab's
+  real and imaginary parts). The notation <code>1j</code> is Python's
   code for the famous imaginary number sqrt(-1).
 </p><p>Now try to change the phase of the signal. You can see that nothing
   changes unless you modify the 3rd and 5th entry of the phase
@@ -262,7 +262,7 @@ plt.show()
     is a peak at zero.
     </p><p>Try changing the localisation of the peak and notice that the
     powerspectrum doesn't change, but the phase of the FFT changes (we
-    unwrapped the phase because Matlab's FFT wraps it when it gets to
+    unwrapped the phase because Python's FFT wraps it when it gets to
     -pi and pi). 
     </p><p>Changing the peak location, it looks like the phase map is
     linear with a slope that decreases linearly with the location of
@@ -924,7 +924,7 @@ plt.show()
 </p><p>First, we need an object. We are going to remain in 2 dimensions,
   and we are going to use the most famous image in medical imaging:
   the Shepp-Logan phantom. This image is so popular that it is
-  included in Matlab's imaging toolbox, so let's create it:
+  included in the skimage's data module, so let's create it:
 </p><pre>import skimage.data
 im = ski.data.shepp_logan_phantom()
 plt.imshow(im)
@@ -993,7 +993,7 @@ plt.show()
 </p><p>Let us try to verify the projection-slice theorem on the phantom
   image. To simplify things, let's just try a projection along either
   X or Y axis (which can be done with the <code>sum</code> function in
-  Matlab). 
+  Numpy). 
 <span class="clickme" onclick="showIt(&#39;ans17&#39;)">Answer</span> 
 </p><div id="ans17" class="answer" style="display: none">   
   <pre>im = ski.data.shepp_logan_phantom()
