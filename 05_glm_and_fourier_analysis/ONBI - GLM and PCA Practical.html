@@ -30,8 +30,7 @@
 
 <p>Let's start simple. Using Python, generate noisy data <b>y</b> using a
   linear model with one regressor <b>x</b> and an intercept. I.e. <code>y=a+b*x</code> 
-</p><pre>  
-import numpy as np
+</p><pre>import numpy as np
 import scipy
 import matplotlib.pylab as plt
 import pandas as pd
@@ -43,23 +42,20 @@ y = intercept + slope*x
 y = y + 10*np.random.randn(len(y),1) # add some noise
 </pre>
 <p>Now plot the data against <b>x</b>:
-</p><pre>  
-plt.plot(x,y,'o')
+</p><pre>plt.plot(x,y,'o')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.show()
 </pre>
 <p>Let's compare fitting a linear model with and without the
   intercept. First, set up two design matrices:
-</p><pre>    
-M1 = x                                           # w/o intercept
+</p><pre>M1 = x                                           # w/o intercept
 M2 = np.concatenate([np.ones((len(x),1)), x], axis=1) # w/ intercept
 </pre>
 <p>Look at M1 and M2 if you are not sure what they should look like
   (e.g. type M1 in the Matlab command window and press enter).
 </p><p>Now solve the two GLMs:
-  </p><pre>    
-beta1 = np.linalg.pinv(M1) @ y
+  </p><pre>beta1 = np.linalg.pinv(M1) @ y
 beta2 = np.linalg.pinv(M2) @ y
   </pre>  
 <p>Look at the values in beta1 and beta2. How should we interpret the
@@ -73,8 +69,7 @@ beta2 = np.linalg.pinv(M2) @ y
 </p></div>
 
 <p>Plot the two models against the data:
-  </p><pre>    
-plt.grid(True)
+  </p><pre>plt.grid(True)
 plt.plot(x,y,'o')
 plt.plot(x, M1 @ beta1, 'r-')
 plt.plot(x, M2 @ beta2, 'b-')
@@ -102,8 +97,7 @@ plt.show()
   </p><div id="hint2" class="answer" style="display: none"> 
     Let's first fit the demeaned model and display the regression
     coefficients (the <code>betas</code>):
-    <pre>      
-M3 = np.concatenate([np.ones((len(x),1)), x-np.mean(x)], axis=1)
+    <pre>M3 = np.concatenate([np.ones((len(x),1)), x-np.mean(x)], axis=1)
 beta3 = np.linalg.pinv(M3) @ y
 print(beta2)
 print(beta3)
@@ -122,16 +116,14 @@ print(beta3)
   (right-click on the link and save on the disk). 
 </p><p>Now load the text file in matlab and arrange the columns of the
   text file into different variables:
-</p><pre>  
-names = ['year', 'month', 'maxTemp', 'minTemp', 'hoursFrost', 'rain', 'hoursSun']
+</p><pre>names = ['year', 'month', 'maxTemp', 'minTemp', 'hoursFrost', 'rain', 'hoursSun']
 df = pd.read_csv('OxfordWeather.txt', delim_whitespace=True, header=None, names=names)
 
 meanTemp   = .5*(df.minTemp+df.maxTemp)
 
 </pre>
 <p>Plot some of the data to familiarise yourself with it.
-</p><pre>
-fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3)
+</p><pre>fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3)
 decades = (np.round(df.year/10)*10)
 ax1.boxplot([df.rain[decades == i] for i in decades.unique()],
         positions=decades.unique(),
@@ -173,8 +165,7 @@ plt.show()
   <li>Fit a linear model with x=min and y=max monthly temperatures.
     <span class="clickme" onclick="showIt(&#39;hint3&#39;)">Answer.</span> 
   <div id="hint3" class="answer" style="display: none"> 
-    <pre>
-# Fit linear model ( y=a*x )
+    <pre># Fit linear model ( y=a*x )
 x = df.minTemp.values.reshape(-1,1)
 y = df.maxTemp.values.reshape(-1,1)
 
@@ -191,7 +182,6 @@ M = np.concatenate([np.ones((len(x),1)), x], axis=1)
 beta = np.linalg.pinv(M) @ y
 plt.plot(x, M @ beta, 'g')
 plt.show()
-
     </pre>
 
   </div> 
@@ -205,8 +195,7 @@ plt.show()
     </div>
     <span class="clickme" onclick="showIt(&#39;hint4.2&#39;)">Answer.</span> 
   <div id="hint4.2" class="answer" style="display: none"> 
-    <pre>
-# Fit quadratic model ( y=a*x^2+b*x+c )
+    <pre># Fit quadratic model ( y=a*x^2+b*x+c )
 x = df.month.values.reshape(-1,1)
 y = df.hoursSun.values.reshape(-1,1)
 
@@ -221,7 +210,6 @@ plt.plot(x, M @ beta, 'r')
 plt.xlabel('month')
 plt.ylabel('hoursSun')
 plt.show()
-
     </pre>
     </div>
   </li>
@@ -234,8 +222,7 @@ plt.show()
     </div>
     <span class="clickme" onclick="showIt(&#39;hint5&#39;)">Answer.</span> 
   <div id="hint5" class="answer" style="display: none"> 
-    <pre>
-# Fit exponential model ( y=a*exp(b*x) )
+    <pre># Fit exponential model ( y=a*exp(b*x) )
 
 x = df.minTemp.values.reshape(-1,1)
 y = np.log(df.hoursFrost.values.reshape(-1,1)) # trick: in order to fit exp with GLM, use log transform!
@@ -260,7 +247,6 @@ plt.show()
 
 # Note: the exponential model doesn't quite work for this
 # data. Below we will try a polynomial model
-
     </pre>
     <p>Note that when applying a transform to
       the data, there are two issues: (1) the transform is not always
@@ -278,8 +264,7 @@ plt.show()
     <span class="clickme" onclick="showIt(&#39;hint6&#39;)">Answer.</span> 
     <div id="hint6" class="answer" style="display: none">       
       Create a text file called fit_poly.m with the following code:
-      <pre>	
-def fit_poly(x,y,p):
+      <pre>def fit_poly(x,y,p):
     """
     [beta,pred,err,sse]=fit_poly(x,y,p)
 
@@ -302,10 +287,7 @@ def fit_poly(x,y,p):
 
       </pre>
       Use the above function on meanTemp/hoursFrost data:
-      <pre>	x=meanTemp;
-
-
-x = meanTemp.values.reshape(-1,1)
+      <pre>x = meanTemp.values.reshape(-1,1)
 y = df.hoursFrost.values.reshape(-1,1)
 
 i = np.argsort(x, axis=0).reshape(-1)
@@ -319,7 +301,6 @@ plt.ylabel('hoursFrost')
 [beta, pred, err, sse] = fit_poly(x, y, 5)
 plt.plot(x, pred, 'r', lw=2)
 plt.show()
-
       </pre>
       <p>Qualitatively, a polynomial of order 5 seems to give a good fit
 	without over-fitting. Techniques for formally testing model
@@ -340,14 +321,12 @@ plt.show()
     <span class="clickme" onclick="showIt(&#39;hint6.1&#39;)">Some examples.</span> 
     <div id="hint6.1" class="answer" style="display: none">   
       Here are some examples. 
-      <pre>	
-#y = a * np.exp(b*x + c*x**2)  # unknown:a,b,c : log transform the data to get GLM
+      <pre>#y = a * np.exp(b*x + c*x**2)  # unknown:a,b,c : log transform the data to get GLM
 #y = a * np.cos(x + phi)       # unknown a,phi : use trigonometric equalities to get GLM
 #y = 1 / (1 + a*np.exp(b*x))   # unknown a,b   : log-transform
       </pre>
       <p>Let's do the cosine example as it is the most fun:
-	</p><pre>	  
-x   = np.linspace(0,10,40).reshape(-1,1)
+	</p><pre>x   = np.linspace(0,10,40).reshape(-1,1)
 a   = 5     # amplitude parameter
 phi = np.pi/4 # phase parameter
 
@@ -375,7 +354,6 @@ plt.plot(x, a_hat*np.cos(x+phi_hat), 'r')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.show()
-
 	</pre>
       <p>One might ask if we can fit <code>y=a*cos(w*x+phi)</code>
       for <code>(a,w,phi)</code>, i.e. find the frequency as well as
@@ -399,8 +377,7 @@ plt.show()
   data that follows a Gaussian distribution with a covariance matrix
   that has a 60 degree rotation with respect to the x-axis. Read the
   code carefully and try to understand all the different steps. 
-</p><pre>  
-# mean position
+</p><pre># mean position
 mu = np.array([5,2])
 
 # angle in degrees
@@ -427,18 +404,15 @@ plt.ylabel('y')
 </pre>
 <p>Now keep the previous plot open, demean the data, and plot the
   demeaned data on the same plot.
-</p><pre>  
-ydemean = y - np.mean(y,axis=0)
+</p><pre>ydemean = y - np.mean(y,axis=0)
 plt.plot(ydemean[:,0], ydemean[:,1], 'k.')
 plt.show()
 </pre>
 <p>Next, calculate the eigenvalue decomposition of the covariance
   matrix and plot the eigenvectors scaled by the square-root of their eigenvalues.
-</p><pre>  
-d,v = np.linalg.eig(np.cov(y.transpose()))
+</p><pre>d,v = np.linalg.eig(np.cov(y.transpose()))
 v = np.abs(v)
 d = np.sqrt(np.abs(d))
-
 
 # Plot the two eigenvectors
 plt.plot(ydemean[:,0], ydemean[:,1], 'k.')
@@ -456,8 +430,7 @@ plt.show()
   we have generated data using a Gaussian distribution.
 </p><p>Now project the data onto the first eigenvector and plot the
   projected data.
-</p><pre>  
-ydemean = Y - np.mean(Y, axis=0)
+</p><pre>ydemean = Y - np.mean(Y, axis=0)
 yy = (ydemean @ v[:,1].reshape(-1,1))*v[:,1].reshape(1,-1)
 plt.plot(yy[:,0],yy[:,1],'g.');
 plt.axis('equal')
@@ -470,8 +443,7 @@ plt.show()
   information that is cast along a "radial" dimension.
 </p><p>Start by generating the doughnut data set (make sure you understand
   what each line is doing in the following code):
-</p><pre>  
-t = 2*np.pi*np.random.rand(1000,1) # random angle
+</p><pre>t = 2*np.pi*np.random.rand(1000,1) # random angle
 r = .5+np.random.rand(1000,1)      # random radius between .5 and 1.5
 x = r*np.sin(t)
 y = r*np.cos(t);
@@ -485,8 +457,7 @@ plt.show()
 </pre>
 <p>Now do the PCA on this data by calculating the eigenvalues of the
   covariance matrix:
-</p><pre>  
-Y = np.concatenate([x, y], axis=1)
+</p><pre>Y = np.concatenate([x, y], axis=1)
 d,v = np.linalg.eig(np.cov(Y.transpose()))
 v = np.abs(v)
 d = np.sqrt(np.abs(d))
@@ -505,8 +476,7 @@ plt.show()
   completely symmetric). 
 </p><p>Furthermore, if we project the data onto
   the mean eigenvector, we loose all information on the doughnut:
-</p><pre>    
-ydemean = Y - np.mean(Y, axis=0)
+</p><pre>ydemean = Y - np.mean(Y, axis=0)
 yy = (ydemean @ v[:,1].reshape(-1,1))*v[:,1].reshape(1,-1)
 plt.plot(yy[:,0],yy[:,1],'g.');
 plt.axis('equal')
@@ -516,8 +486,7 @@ plt.show()
 </pre>
 <p>Now one last data-cloud example. Consider the data generated with
   the following bit of code:
-</p><pre>  
-y1 = np.random.multivariate_normal(np.array([0,0]),
+</p><pre>y1 = np.random.multivariate_normal(np.array([0,0]),
                                    np.array([[1,0],[0,20]]),
                                    1000)
 y2 = np.random.multivariate_normal(np.array([5,0]),
@@ -539,8 +508,7 @@ plt.show()
   affects the results of a data reduction that uses PCA.
 </p><p>First calculate the eigenspectrum of the covariance matrix and plot
   the major and minor eigenvectors:
-</p><pre>  
-d,v = np.linalg.eig(np.cov(y.transpose()))
+</p><pre>d,v = np.linalg.eig(np.cov(y.transpose()))
 v = np.abs(v)
 d = np.sqrt(np.abs(d))
 plt.plot(y[:,0],y[:,1],'k.')
@@ -554,8 +522,7 @@ plt.show()
 <p>Now project the data onto the first eigenvector. You can see that
   the cluster information is completely lost. PCA is not a good way to
   cleanup this data.
-</p><pre>  
-yy = (y @ v[:,1].reshape(-1,1)) @ v[:,1].reshape(1,-1);
+</p><pre>yy = (y @ v[:,1].reshape(-1,1)) @ v[:,1].reshape(1,-1);
 plt.plot(yy[:,0],yy[:,1],'g.')
 plt.axis('equal')
 plt.xlabel('x')
@@ -574,8 +541,7 @@ plt.show()
   from <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/world-map.gif">here</a>.
 </p><p>Now open the data in Matlab and visualise it
   with <code>imagesc</code>.
-</p><pre>  
-import skimage as ski
+</p><pre>import skimage as ski
 import skimage.io
 
 im = ski.io.imread('world-map.gif').astype('float64')  # read image
@@ -586,26 +552,22 @@ plt.show()
 </pre>
 <p>Start by calculating the eigenspectrum of the data covariance
   matrix:
-</p><pre>  
-d,v = np.linalg.eig(np.cov(im.transpose()))
+</p><pre>d,v = np.linalg.eig(np.cov(im.transpose()))
 </pre>
 <p>Now we are going to reduce the dimensionality of the data by
   reconstructing the data using a subset of the eigenvectors. To this
   end, we need to first demean the rows of the data matrix:
-</p><pre>  
-x = im
+</p><pre>x = im
 m = np.mean(x, axis=1)
 
 for i in range(x.shape[0]):
     x[i,:] = x[i,:] - m[i]
-
 </pre>
 <p>Next, reconstruct the data using only the top <code>p</code>
   eigenvectors. Look at what happens with and without adding the mean
   back to the data. Play with different values of <code>p</code>. When
   do we start seeing Great Britain? 
-  </p><pre> 
-p = 4
+  </p><pre>p = 4
 
 # reconstruct the data with top p eigenvectors
 y = (x @ v[:,:p]) @ v[:,:p].transpose()
@@ -624,8 +586,7 @@ plt.show()
 
   <p> Same as above but with <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/Queen_Victoria_by_Bassano.jpg">Queen Victoria</a>. When do you start to see
     her moustache?
-</p><pre>  
-im = ski.io.imread('Queen_Victoria_by_Bassano.jpg').astype('float64')
+</p><pre>im = ski.io.imread('Queen_Victoria_by_Bassano.jpg').astype('float64')
 im = np.sum(im, axis=2)
 
 # reconstruct the data with top p eigenvectors
