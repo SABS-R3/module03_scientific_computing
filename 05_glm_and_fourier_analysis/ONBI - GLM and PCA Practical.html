@@ -125,7 +125,7 @@ print(beta3)
   weather data textfile from this
   link: <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/OxfordWeather.txt">OxfordWeather</a>
   (right-click on the link and save on the disk). 
-</p><p>Now load the text file in matlab and arrange the columns of the
+</p><p>Now load the text file in Python's pandas module and arrange the columns of the
   text file into different variables:
 </p><pre>names = ['year', 'month', 'maxTemp', 'minTemp', 'hoursFrost', 'rain', 'hoursSun']
 df = pd.read_csv('OxfordWeather.txt', delim_whitespace=True, header=None, names=names)

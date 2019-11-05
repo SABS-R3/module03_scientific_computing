@@ -66,9 +66,9 @@ plt.show()
   able to easily count the number of cycles per second :)
 
 </p><p>You may wonder why I removed the last time point? This is simply
-  because when doing an FFT, matlab assumes that the
+  because when doing an FFT, the algorithm assumes that the
   signal you give it is periodic, repeating itself indefinitely. So if
-  I want matlab to think the signal is a pure infinite cosine
+  I want the FFT to think the signal is a pure infinite cosine
   function, I need to stop just before the next cycle. If you don't
   understand this, don't worry, it's not important, just carry on..
 
@@ -152,7 +152,7 @@ plt.show()
 
 <p>Now let's do the opposite to the above. Instead of creating a
   signal and looking at its FFT, we are going to create an FFT and
-  look at its signal. We will use the inverse FFT function in matlab
+  look at its signal. We will use the inverse FFT function in Numpy 
   (<code>ifft</code>). 
 </p><p>We will create two signals, one that is the magnitude and one that is the
   phase, and we will look at the inverse fourier
@@ -262,7 +262,7 @@ plt.show()
     is a peak at zero.
     </p><p>Try changing the localisation of the peak and notice that the
     powerspectrum doesn't change, but the phase of the FFT changes (we
-    unwrapped the phase because Python's FFT wraps it when it gets to
+    unwrapped the phase because Numpy's FFT wraps it when it gets to
     -pi and pi). 
     </p><p>Changing the peak location, it looks like the phase map is
     linear with a slope that decreases linearly with the location of
@@ -459,7 +459,7 @@ plt.show()
 
 
 </p><h3>2D Fourier transform</h3>
-<p>The 2 dimensional version of FFT in matlab is called FFT2. It is equivalent to
+<p>The 2 dimensional version of FFT in Numpy is called FFT2. It is equivalent to
   doing an FFT along one dimension then along the other. 
 
 </p><p>Let's look at the 2D FFT using images. First, we are
@@ -531,8 +531,7 @@ plt.show()
 </pre>
 <p>Now not so beautiful hey? Ok, first make sure you understand the
   code above. We used <code>fftshift</code>. That is because of the
-  way fft works in matlab (type help to read about
-  this). <code>fftshift</code> recenters the results so that zero
+  way fft works in Numpy (see the documentation <a href=https://docs.scipy.org/doc/numpy/reference/routines.fft.html>here</a>). <code>fftshift</code> recenters the results so that zero
   frequencies are in the centre (compare the code
   above with and without <code>fftshift</code>). Also, don't pay too much attention to
   the use of the quantile function (although read the help if you
@@ -649,8 +648,8 @@ plt.show()
 </p><p>
 <img src="./ONBI - Signal and Image Processing Practical_files/sampling3.png" alt="Sampling image" width="600" height="320">
 
-</p><p>Now, when you run an FFT in matlab, the repeating pattern is not
-  apparent. That is because matlab implicitly considers the signal and
+</p><p>Now, when you run an FFT in Numpy, the repeating pattern is not
+  apparent. That is because the FFT algorithm implicitly considers the signal and
   its FFT to be periodic (i.e. repeating) and only gives you one
   period. 
 
@@ -672,7 +671,7 @@ plt.plot(t,x,'.-')
 plt.show()
 </pre>
 
-<p>Now remember: this signal is assumed by matlab to be periodic, so
+<p>Now remember: this signal is assumed by the FFT to be periodic, so
   even though it has finite duration, it will be treated by the FFT as
   if it were repeating, and therefore as if it were a true cosine
   function. 
@@ -757,7 +756,7 @@ plt.show()
   samples in real space. Furthermore, the repeating period is
   inversely related to the sampling period. 
 </p><p>Zero padding means adding zeros on either side of the FFT before
-  reconstructing the signal. Since the matlab FFT assumes the signal
+  reconstructing the signal. Since the Numpy FFT assumes the signal
   to be periodic, zeropadding is like repeating the signal with
   increased repeat period, which in the real domain means higher
   sampling rate. Therefore, zero padding allows us to reconstruct an
@@ -1043,7 +1042,7 @@ of an image using the projection-slice theorem and the ifft.
 
 </p><p>But first, download
   this <a href="http://www.fmrib.ox.ac.uk/~saad/ONBI/brain.bmp">brain</a>
-  and load it into matlab:
+  and load it into Python:
 </p><pre>im = ski.io.imread('brain.bmp')
 </pre>
 <p>Remember that in MRI, we measure the FFT of the object, aka
