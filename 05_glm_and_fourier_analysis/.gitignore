@@ -1,0 +1,6 @@
+env
+*.jpg
+*.png
+*.bmp
+*.gif
+*.mat
