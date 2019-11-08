@@ -1,5 +1,8 @@
 \documentclass[a4paper]{article}
 
+\usepackage{enumitem}
+\usepackage{amsmath}
+
 \input{common.tex}
 
 \begin{document}
@@ -8,42 +11,101 @@
 
 \vspace{0,75cm}
 
-
 \subsection*{Exercise 1 - Laplace equation}
 
-- construct matrix for laplace and solve
-- compare dense versus sparse representation
+\begin{enumerate}[label=\alph*.]
+\item Solve the following Poisson equation on the 1D domain $0 \le x \le 1$, using
+  finite differences
 
-\subsection*{Exercise 1 - time integration}
+  $$-\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$u(0) = 0$$ 
+  $$u(1) = 0$$ 
 
-- heat eq (explicit time)
-- biharmonic eq (implicit time)
-- kuramoto-sivashinsky (combination - IMEX)
-- method of lines - scipy odeint - using autodiff for derivatives
+  Derive the analytical solution and compare against your numerical one.
 
-\subsection*{Exercise 1 - Perona–Malik Image denoising}
+\item Solve the same Poisson equation, this time using a Neumann boundary condition
 
-- load image
-- try regular diffusion to reduce noise
-- discretise and solve perona-malik equation to preserve edges
+  $$-\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$u(0) = 0$$ 
+  $$\left. \frac{\partial u}{\partial x} \right|_{x=1} = 0$$ 
+
+  Derive the analytical solution and compare against your numerical one.
+
+\item Solve the Poisson equation on the 2D domain $-1 \le x,y \le 1$
+
+  $$-\frac{\partial^2 u}{\partial x^2} -\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$u(-1, y) = 0 \qquad u( 1, y) = 0$$ 
+  $$u( x,-1) = 0 \qquad u( x, 1) = 0$$ 
+
+  Compare against the analytical solution given by
+
+  \begin{align}
+    u(x,y) = \frac{1-x^2}{2} - \frac{16}{\pi^3} \sum_{\substack{k=0 \\ k\text{
+      odd}}}^\infty \biggl\{ 
+      &\frac{\sin(k\pi(1+x)/2)}{k^3\sinh(k\pi)} \\
+      &\times (\sinh(k\pi(1+y)/2) + \sinh(k\pi(1-y)/2)) 
+      \biggr\}
+  \end{align}
+
+\item  For each of the problems listed above you had to solve a linear system of
+  equations. Scipy has solvers both for dense matrices
+    (\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve.html}{scipy.linalg.solve})
+    and for sparse representations
+    (\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.spsolve.html#scipy.sparse.linalg.spsolve}{scipy.sparse.linalg.spsolve}).
+    Pick one of the problems above and time how long these solves take with varying
+    number of discrete points $N$. How does the compute time scale with $N$? Explain the
+observed scaling for the two matrix representations?  \end{enumerate}
+
+\subsection*{Exercise 2 - time integration}
+
+\begin{enumerate}[label=\alph*.]
+  \item Solve for $u(x, t)$ the 1D Fisher equation given below over $0 \le t \le 42$ and $0 \le x \le
+  20$, using an explicit Euler time-stepping
+  scheme. Measure the speed of the expected travelling wave solution and ensure that it
+    is equal to $c=2$.
+
+    $$ \frac{du}{dt} = \frac{\partial^2 u}{\partial x^2} + u (1-u)$$
+    $$ u(x,0) = \begin{cases} 
+                    1 & \text{for } x \le 3 \\ 
+                    0 & \text{otherwise}
+                \end{cases}
+    $$
+    $$u(0, t) = 1$$
+    $$u(42, t) = 0$$
+
+
+  \item Solve for $u(x,t)$ the biharmonic equation given below over $0 \le t \le 0.5$ and
+    $-1 \le x \le 1$, using both an explicit and implicit Euler time-stepping scheme.
+    Comment on the differences in the required time-step size
+
+    $$\frac{du}{dt} = \frac{\partial^4 u}{\partial x^4}$$
+    $$ u(x,0) = \begin{cases} 
+                    1 & \text{for } |x| \le 3 \\ 
+                    0 & \text{otherwise}
+                \end{cases}
+    $$
+    $$u(-1, t) = 0$$
+    $$u(1, t) = 0$$
+
+  \item Solve for $u(x,t)$ the Kuramoto Sivashinsky equation given below over $0 \le t
+    \le 0.5$ and $-1 \le x \le 1$. Use the Euler method to discretise the time derivative,
+    but treat the non-linear term explictly, and the rest of the terms implicitly. Why is it
+    preferrable to treat the non-linear term explicitly in this case? You should obtain
+    an oscillating, chaotic behaviour. Longer waves grow because of the
+    $-\frac{\partial^2 u}{\partial x^2}$ term, shorter waves decay because of the
+    $-\frac{\partial^4 u}{\partial x^4}$ term, and the non-linear term transfers energy
+    from long to short waves.
+
+    $$\frac{du}{dt} = -\frac{\partial^2 u}{\partial x^2} - \frac{\partial^4 u}{\partial
+    x^4} - \frac{\partial}{\partial x} (u^2/2)$$
+    $$ u(x,0) = \begin{cases} 
+                    1 & \text{for } |x| \le 3 \\ 
+                    0 & \text{otherwise}
+                \end{cases}
+    $$
+    $$u(-1, t) = 0$$
+    $$u(1, t) = 0$$
+\end{enumerate}
 
  
-\begin{solution}
-\begin{python}
-pi = 3.14159265358979312
-
-my_pi = 1.
-
-for i in range(1, 100000):
-    my_pi *= 4 * i ** 2 / (4 * i ** 2 - 1.)
-
-my_pi *= 2
-
-print(pi)
-print(my_pi)
-print(abs(pi - my_pi))
-\end{python}
-\end{solution}
-
-
 \end{document}

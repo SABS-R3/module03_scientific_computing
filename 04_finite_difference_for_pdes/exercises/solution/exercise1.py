@@ -17,7 +17,7 @@ def construct_laplace_matrix_2d(N, h):
     I = scipy.sparse.eye(N)
     return scipy.sparse.kron(L, I) + scipy.sparse.kron(I, L)
 
-def solve_laplace():
+def solve_poisson_dirichelet():
     N = 100
     x = np.linspace(0, 1, N)
     h = x[1]-x[0]
@@ -26,9 +26,27 @@ def solve_laplace():
     b = -np.ones(N-2)
     y_interior = np.linalg.solve(L.toarray(), b)
     y = np.concatenate(([0], y_interior, [0]))
-    y_exact = 0.5 - 0.5*x**2
+    y_exact = 0.5*x - 0.5*x**2
 
-    #TODO: get students to do different boundary conditions!!
+    plt.clf()
+    plt.plot(x, y, label='FD')
+    plt.plot(x, y_exact, label='exact')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend()
+    plt.show()
+
+def solve_poisson_neumann():
+    N = 100
+    x = np.linspace(0, 1, N)
+    h = x[1]-x[0]
+    x_interior = x[1:-1]
+    L = construct_laplace_matrix_1d(N-2, h).toarray()
+    L[-1,-1] /= 2.0
+    b = -np.ones(N-2)
+    y_interior = np.linalg.solve(L, b)
+    y = np.concatenate(([0], y_interior, [y_interior[-1]]))
+    y_exact = x - 0.5*x**2
 
     plt.clf()
     plt.plot(x, y, label='FD')
@@ -41,17 +59,25 @@ def solve_laplace():
 
 def solve_laplace_2d():
     N = 100
-    x = np.linspace(0, 1, N)
+    x = np.linspace(-1, 1, N)
     h = x[1]-x[0]
     [xx, yy] = np.meshgrid(x[1:-1], x[1:-1])
-    x_interior = xx.reshape(-1)
+    x = xx.reshape(-1)
+    y = yy.reshape(-1)
     L = construct_laplace_matrix_2d(N-2, h)
-    b = -np.ones_like(x_interior)
-    y_interior = scipy.sparse.linalg.spsolve(L, b)
-    y_exact = 0.5 - 0.5*x**2
+    b = -np.ones_like(x)
+    u = scipy.sparse.linalg.spsolve(L, b)
+    u_exact = 0.5 - 0.5*x**2
+
+    for k in range(1,100,2):
+        u_exact -= 16.0/np.pi**3*np.sin(k*np.pi*(1+x)/2)/(k**3*np.sinh(k*np.pi))*(np.sinh(k*np.pi*(1+y)/2)+np.sinh(k*np.pi*(1-y)/2))
+
+    error = np.linalg.norm(u_exact - u)/np.linalg.norm(u_exact)
+
+    print('error is {}'.format(error))
 
     plt.clf()
-    plt.imshow(y_interior.reshape((N-2, N-2)))
+    plt.imshow(u.reshape((N-2, N-2)))
     plt.show()
 
 
@@ -65,7 +91,7 @@ def compare_dense_and_sparse():
         x = np.linspace(0, 1, N)
         h = x[1]-x[0]
         x_interior = x[1:-1]
-        L = construct_laplace_matrix_1d(N, h).tocsr()
+        L = construct_laplace_matrix_1d(N-2, h).tocsr()
         b = -np.ones(N-2)
         L_dense = L.toarray()
         t0 = time.perf_counter()
@@ -89,5 +115,5 @@ def compare_dense_and_sparse():
 
 
 if __name__ == '__main__':
-    solve_laplace_2d()
+    compare_dense_and_sparse()
 
