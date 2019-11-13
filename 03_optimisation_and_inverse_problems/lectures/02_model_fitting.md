@@ -3,8 +3,8 @@ title: Model Fitting
 author: Martin Robinson
 date: Nov 2019
 urlcolor: blue
-
-\DeclareMathOperator*{\argmin}{arg\,min}
+header-includes: |
+  \DeclareMathOperator*{\argmin}{arg\,min}
 ---
 
 # Outline
@@ -69,7 +69,7 @@ Can evaluate the goodness of fit of of the model to the data via
 
 - Our model is now:
 
-$$\frac{dy}{dx} = f(x, y, \beta)$$
+  $$\frac{dy}{dx} = f(x, y, \beta)$$
 
 - More difficulte to evaluate than a polynomial model, but can take advantage of 
   domain-specific mechanistic models of the underlying process. The parameters $\beta$ 
@@ -78,36 +78,57 @@ $$\frac{dy}{dx} = f(x, y, \beta)$$
 - How to fit? Simplest approach is to assume that the data has been sampled from a 
   normal distribution with the mean given by the solution of the ODE:
 
-$$z_j \sim y(x_j, \beta) + \mathcal{N}(0, \sigma)$$
+  $$z_j \sim y(x_j, \beta) + \mathcal{N}(0, \sigma)$$
+
+---------------------
 
 - This give us a likelihood of a given set of parameters $\beta$, given the data 
   $\mathbf{y}$:
 
-$$\mathcal{L}(\beta, \sigma | \mathbf{z}) = \prod_{j}^{m} \frac{1}{\sqrt{2 \pi \sigma^2} 
-\exp \left( -\frac{(z_j-y(x_j,\beta))^2}{2 \sigma^2} \right)$$
+  $$\mathcal{L}(\beta, \sigma | \mathbf{z}) = \prod_j^m \frac{1}{\sqrt{2 \pi \sigma^2}} 
+  \exp \left( -\frac{(z_j-y(x_j,\beta))^2}{2 \sigma^2} \right)$$
 
 - Normally work with the log-likelihood:
 
-$$\log \mathbcal{L}(\beta, \sigma | \mathbf{z}) = -\frac{m}{2} \log(2\pi) - m 
-\log(\sigma) - \frac{1}{2\sigma^2} \sum_j^m (z_j-y(x_j,\beta))^2$$
+  $$\log \mathcal{L}(\beta, \sigma | \mathbf{z}) = -\frac{m}{2} \log(2\pi) - m 
+  \log(\sigma) - \frac{1}{2\sigma^2} \sum_j^m (z_j-y(x_j,\beta))^2$$
 
 - We want to find the parameters $\beta$ that maximise the log-likelihoood. Assuming $m$ 
   and $\sigma$ are fixed, this corresponds to minimising the sum-of-squares of the 
   residuals:
 
-$$\sum_j^m (z_j-y(x_j,\beta))^2$$
+  $$\sum_j^m (z_j-y(x_j,\beta))^2$$
 
 # Gradient of the log-likeliood
 
 - We want to minimise the function:
 
-$$f(\beta) = \sum_j^m (z_j-y(x_j,\beta))^2$$
+  $$f(\beta) = \sum_j^m (y(x_j,\beta) - z_j)^2$$
 
 - If we want to use a gradient-based optimisation method, we need the gradient wrt 
   $\beta$
 
-$$\frac{d f(\beta)}{d\beta} = \sum_j^m 
--2\frac{dy}{d\beta}(x_j,\beta)(z_j-y(x_j,\beta))$$
+  $$\frac{d f(\beta)}{d\beta} = \sum_j^m 
+  2\frac{dy}{d\beta}(x_j,\beta)(y(x_j,\beta)-z_j)$$
+
+---------------------
+
+- To find $\frac{dy}{d\beta}$, take the derivative of the ODE rate equation
+
+  $$\frac{d}{d\beta} \frac{dy}{dx} = \frac{\partial f(x, y, \beta)}{\partial 
+  y}\frac{\partial y}{\partial \beta} + \frac{\partial f(x, y, \beta)}{\partial \beta}$$
+
+- Rearrange to get an ODE equation in terms of $s = \frac{dy}{d\beta}$
+
+  $$\frac{ds}{dx} = \frac{\partial f(x, y, \beta)}{\partial y} s + \frac{\partial f(x, 
+  y, \beta)}{\partial \beta}$$
+
+- Solve the augmented ODE system comprising of the equation for $\frac{ds}{dx}$ and 
+  $\frac{dy}{dx}$
+
+  $$\frac{d}{dx} \begin{bmatrix}y \\ s\end{bmatrix} = \begin{bmatrix}f(x, y, \beta) \\ 
+  \frac{\partial f(x, y, \beta)}{\partial y} s + \frac{\partial f(x, y, \beta)}{\partial 
+  \beta}\end{bmatrix}$$
 
 
 

@@ -5,7 +5,7 @@ publish_dir = publish
 solution_dir = $(practicals_dir)/solution
 solution_files = $(solution_dir)/*.py 
 
-all: ${publish_dir}/exercise.pdf ${publish_dir}/lecture_01_derivatives_and_optimisation.pdf ${publish_dir}/solution.zip
+all: ${publish_dir}/exercise.pdf ${publish_dir}/lecture_01_derivatives_and_optimisation.pdf ${publish_dir}/solution.zip ${publish_dir}/lecture_02_model_fitting.pdf
 
 ${publish_dir}/solution.zip: $(solution_files)
 	zip $@ $(solution_files) 
