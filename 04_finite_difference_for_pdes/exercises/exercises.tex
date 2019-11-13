@@ -17,7 +17,7 @@
 \item Solve the following Poisson equation on the 1D domain $0 \le x \le 1$, using
   finite differences
 
-  $$-\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$-u_{xx} = 1$$ 
   $$u(0) = 0$$ 
   $$u(1) = 0$$ 
 
@@ -25,15 +25,15 @@
 
 \item Solve the same Poisson equation, this time using a Neumann boundary condition
 
-  $$-\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$-u_{xx} = 1$$ 
   $$u(0) = 0$$ 
-  $$\left. \frac{\partial u}{\partial x} \right|_{x=1} = 0$$ 
+  $$\left. u_x \right|_{x=1} = 0$$ 
 
   Derive the analytical solution and compare against your numerical one.
 
 \item Solve the Poisson equation on the 2D domain $-1 \le x,y \le 1$
 
-  $$-\frac{\partial^2 u}{\partial x^2} -\frac{\partial^2 u}{\partial x^2} = 1$$ 
+  $$-u_{xx} - u_{yy} = 1$$ 
   $$u(-1, y) = 0 \qquad u( 1, y) = 0$$ 
   $$u( x,-1) = 0 \qquad u( x, 1) = 0$$ 
 
@@ -64,7 +64,7 @@ observed scaling for the two matrix representations?  \end{enumerate}
   scheme. Measure the speed of the expected travelling wave solution and ensure that it
     is equal to $c=2$.
 
-    $$ \frac{du}{dt} = \frac{\partial^2 u}{\partial x^2} + u (1-u)$$
+    $$ u_t = u_{xx} + u (1-u)$$
     $$ u(x,0) = \begin{cases} 
                     1 & \text{for } x \le 3 \\ 
                     0 & \text{otherwise}
@@ -78,7 +78,7 @@ observed scaling for the two matrix representations?  \end{enumerate}
     $-1 \le x \le 1$, using both an explicit and implicit Euler time-stepping scheme.
     Comment on the differences in the required time-step size
 
-    $$\frac{du}{dt} = \frac{\partial^4 u}{\partial x^4}$$
+    $$\frac{du}{dt} = u_{xxxx}$$
     $$ u(x,0) = \begin{cases} 
                     1 & \text{for } |x| \le 3 \\ 
                     0 & \text{otherwise}
@@ -88,16 +88,14 @@ observed scaling for the two matrix representations?  \end{enumerate}
     $$u(1, t) = 0$$
 
   \item Solve for $u(x,t)$ the Kuramoto Sivashinsky equation given below over $0 \le t
-    \le 0.5$ and $-1 \le x \le 1$. Use the Euler method to discretise the time derivative,
-    but treat the non-linear term explictly, and the rest of the terms implicitly. Why is it
-    preferrable to treat the non-linear term explicitly in this case? You should obtain
-    an oscillating, chaotic behaviour. Longer waves grow because of the
-    $-\frac{\partial^2 u}{\partial x^2}$ term, shorter waves decay because of the
-    $-\frac{\partial^4 u}{\partial x^4}$ term, and the non-linear term transfers energy
-    from long to short waves.
+    \le 0.5$ and $-1 \le x \le 1$. Use the Euler method to discretise the time
+    derivative, but treat the non-linear term explictly, and the rest of the terms
+    implicitly. Why is it preferrable to treat the non-linear term explicitly in this
+    case? You should obtain an oscillating, chaotic behaviour. Longer waves grow because
+    of the $-u_{xx}$ term, shorter waves decay because of the $-u_{xxxx}$ term, and the
+    non-linear term transfers energy from long to short waves.
 
-    $$\frac{du}{dt} = -\frac{\partial^2 u}{\partial x^2} - \frac{\partial^4 u}{\partial
-    x^4} - \frac{\partial}{\partial x} (u^2/2)$$
+    $$\frac{du}{dt} = -u_{xx} - u_{xxxx} - (u^2/2)_x$$
     $$ u(x,0) = \begin{cases} 
                     1 & \text{for } |x| \le 3 \\ 
                     0 & \text{otherwise}
