@@ -123,11 +123,11 @@ $$\frac{u_{i+1} - 2u_i + 0}{h^2} = 0$$
   equations in matrix format:
 
 $$
-\begin{bmatrix} -2      & 1      &         &        \\
- 1      & -2     & 1       &        \\
-        & \ddots & \ddots  &  \ddots\\
-        & 1      &  -2     &  1     \\
-        &        &   1     & -2     \end{bmatrix}
+\begin{bmatrix} -2      & 1      &         &   &     \\
+ 1      & -2     & 1       &       & \\
+&\ddots & \ddots  &  \ddots &\\
+&        & 1      &  -2     &  1     \\
+&        &        &   1     & -2     \end{bmatrix}
 \begin{bmatrix} u_1    \\
 u_2    \\
 \vdots \\
@@ -152,11 +152,11 @@ $$u(1) = 0$$
 - Can represent this using an additive vector:
 
 $$
-\begin{bmatrix} -2      & 1      &         &        \\
- 1      & -2     & 1       &        \\
-        & \ddots & \ddots  &  \ddots\\
-        & 1      &  -2     &  1     \\
-        &        &   1     & -2     \end{bmatrix}
+\begin{bmatrix} -2      & 1      &         &  &      \\
+ 1      & -2     & 1       &      &  \\
+&\ddots & \ddots  &  \ddots &\\
+&        & 1      &  -2     &  1     \\
+&        &        &   1     & -2     \end{bmatrix}
 \begin{bmatrix} u_1    \\
 u_2    \\
 \vdots \\
@@ -196,11 +196,11 @@ $$\frac{u_{i+1} - 2u_i + u_{i}}{h^2} = 0$$
 - And the equations become:
 
 $$
-\begin{bmatrix} -1      & 1      &         &        \\
- 1      & -2     & 1       &        \\
-        & \ddots & \ddots  &  \ddots\\
-        & 1      &  -2     &  1     \\
-        &        &   1     & -2     \end{bmatrix}
+\begin{bmatrix} -1      & 1      &         &    &   \\
+ 1      & -2     & 1       &      & \\
+&\ddots & \ddots  &  \ddots &\\
+&        & 1      &  -2     &  1     \\
+&        &        &   1     & -2     \end{bmatrix}
 \begin{bmatrix} u_1    \\
 u_2    \\
 \vdots \\
@@ -212,6 +212,84 @@ u_{N}  \end{bmatrix}
 0    \\
 0    \end{bmatrix}
 $$
+
+# Extending to 2D
+
+$$u_{xx} + u_{yy} = 0\text{ for }0 \le x,y \le 1$$
+
+- Discretise both $u_{xx}$ and $u_{yy}$ separatly
+
+$$\frac{u_{i+1,j} - 2u_{i,j} + u_{i-1,j}}{h^2} + \frac{u_{i,j+1} - 2u_{i,j} + 
+u_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
+
+-------------------------------
+
+               ^
+          1    +----+----+----------+----+
+               |    |    |          |    |
+          y_N  +----+----+----------+----+
+               |    |    |          |    |
+               |    |    |          |    |
+               |    |    |          |    |
+          y_1  +----+----+----------+----+
+               |    |    |          |    |
+          y_0  +----+----+----------+----+
+               |    |    |          |    |
+               +----+----+----------+----+> x
+              0   x_1  x_2    ... x_N   1
+
+
+- To form a matrix equation, collect all the $u_{i,j}$ values into a single vector
+
+----------------------
+
+- Assuming lexiocographical ordering where $i$ advances more quickly than $j$, gives the 
+  following equation (with homogenous Dirichlet bcs)
+
+\begin{equation*}
+\left[\begin{array}{@{}cccc|cccc@{}}
+-4 & 1 &         &        &  1   &      &        &  \\
+1  & -4& 1       &        &      & 1    &        &  \\
+   & 1 &  -4     &   1    &      &      & \ddots &  \\
+   &   &  \ddots & \ddots &\ddots&      &        & \ddots \\
+   \hline
+  1&   &         & \ddots &\ddots&\ddots&        &  \\
+   & 1 &         &        &\ddots&      &        &  \\
+   &   & \ddots  &        &      &      &        &   \\
+   &   &         & \ddots &      &      &        &   \end{array}\right]
+\left[\begin{array}{@{}c@{}}
+  u_{1,1}    \\
+u_{2,1}    \\
+\vdots \\
+u_{N,1}  \\
+\hline
+u_{1,2}    \\
+u_{2,2}    \\
+\vdots \\
+u_{N,2}  \end{array}\right]
+= \left[\begin{array}{@{}c@{}}
+ 0    \\
+0    \\
+\vdots \\
+0    \\
+  \hline  
+  0    \\
+0    \\
+\vdots \\
+0   \end{array}\right]
+\end{equation*}
+
+# Kronicker product
+
+- This matrix $A_{2D}$ is acutally the sum of two terms, one associated with the 
+  discretisation of $u_{xx}$ given by $A_x$, and the other associated with the 
+  discretisation of $u_{yy}$ given by $A_y$
+- We can use the Kronecker (tensor) product to construct $A_{2D}$
+
+$$A_{2D} = (I_y \otimes A_x) + (A_y \otimes I_x)$$
+
+- Where the Kronecker product $C = A \otimes B$ is given by
+
 
 # Solving linear systems
 
