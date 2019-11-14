@@ -102,7 +102,9 @@ Discretise $u_{xx} = 0$ in space:
 
 Gives a set of $N$ equations at each interior point on the domain:
 
-$$\frac{u_{i+1} - 2u_i + u_{i-1}}{h^2} = 0 \text{ for } i = 1...N$$
+$$\frac{v_{i+1} - 2v_i + v_{i-1}}{h^2} = 0 \text{ for } i = 1...N$$
+
+where $v_i \approx u(x_i)$.
 
 # Boundary conditions 
 
@@ -114,10 +116,10 @@ $$\frac{u_{i+1} - 2u_i + u_{i-1}}{h^2} = 0 \text{ for } i = 1...N$$
 
 # Dirichlet 
 
-- Take for example $u(0) = 0$ (homogenous dirichlet bc), this gives $u_0 = 0$, and the 
+- Take for example $u(0) = 0$ (homogenous dirichlet bc), this gives $v_0 = 0$, and the 
   equation at $x_1$ becomes:
 
-$$\frac{u_{i+1} - 2u_i + 0}{h^2} = 0$$
+$$\frac{v_{i+1} - 2v_i + 0}{h^2} = 0$$
 
 - Lets put a similar bc at the other boundary, $u(1) = 0$, and represent the final $N$ 
   equations in matrix format:
@@ -129,11 +131,11 @@ $$
 &\ddots & \ddots  &  \ddots &\\
 &        & 1      &  -2     &  1     \\
 &        &        &   1     & -2     \end{bmatrix}
-\begin{bmatrix} u_1    \\
-u_2    \\
+\begin{bmatrix} v_1    \\
+v_2    \\
 \vdots \\
-u_{N-1}\\
-u_{N}  
+v_{N-1}\\
+v_{N}  
 \end{bmatrix}
 = \begin{bmatrix} 0    \\
 0    \\
@@ -159,11 +161,11 @@ $$
 &\ddots & \ddots  &  \ddots &\\
 &        & 1      &  -2     &  1     \\
 &        &        &   1     & -2     \end{bmatrix}
-\begin{bmatrix} u_1    \\
-u_2    \\
+\begin{bmatrix} v_1    \\
+v_2    \\
 \vdots \\
-u_{N-1}\\
-u_{N}  \end{bmatrix}
+v_{N-1}\\
+v_{N}  \end{bmatrix}
 +
 \frac{1}{h^2}
 \begin{bmatrix} 1    \\
@@ -188,11 +190,11 @@ $$u(1) = 0$$
 
 - bc at $x=0$ gives the following equation (using forward difference):
 
-$$u_1 - u_0 = 0$$
+$$v_1 - v_0 = 0$$
 
 - So the equation at $x_1$ becomes:
 
-$$\frac{u_{i+1} - 2u_i + u_{i}}{h^2} = 0$$
+$$\frac{v_{i+1} - 2v_i + v_{i}}{h^2} = 0$$
 
 # Neumann bc
 
@@ -205,11 +207,11 @@ $$
 &\ddots & \ddots  &  \ddots &\\
 &        & 1      &  -2     &  1     \\
 &        &        &   1     & -2     \end{bmatrix}
-\begin{bmatrix} u_1    \\
-u_2    \\
+\begin{bmatrix} v_1    \\
+v_2    \\
 \vdots \\
-u_{N-1}\\
-u_{N}  \end{bmatrix}
+v_{N-1}\\
+v_{N}  \end{bmatrix}
 = \begin{bmatrix} 0    \\
 0    \\
 \vdots \\
@@ -223,8 +225,8 @@ $$u_{xx} + u_{yy} = 0\text{ for }0 \le x,y \le 1$$
 
 - Discretise both $u_{xx}$ and $u_{yy}$ separatly
 
-$$\frac{u_{i+1,j} - 2u_{i,j} + u_{i-1,j}}{h^2} + \frac{u_{i,j+1} - 2u_{i,j} + 
-u_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
+$$\frac{v_{i+1,j} - 2v_{i,j} + v_{i-1,j}}{h^2} + \frac{v_{i,j+1} - 2v_{i,j} + 
+v_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
 
 -------------------------------
 
@@ -243,7 +245,7 @@ u_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
               0   x_1  x_2    ... x_N   1
 
 
-- To form a matrix equation, collect all the $u_{i,j}$ values into a single vector
+- To form a matrix equation, collect all the $v_{i,j}$ values into a single vector
 
 ----------------------
 
@@ -263,15 +265,15 @@ u_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
    &   & \ddots  &        &      &      &        &   \\
    &   &         & \ddots &      &      &        &   \end{array}\right]
 \left[\begin{array}{@{}c@{}}
-  u_{1,1}    \\
-u_{2,1}    \\
+  v_{1,1}    \\
+v_{2,1}    \\
 \vdots \\
-u_{N,1}  \\
+v_{N,1}  \\
 \hline
-u_{1,2}    \\
-u_{2,2}    \\
+v_{1,2}    \\
+v_{2,2}    \\
 \vdots \\
-u_{N,2}  \end{array}\right]
+v_{N,2}  \end{array}\right]
 = \left[\begin{array}{@{}c@{}}
  0    \\
 0    \\
