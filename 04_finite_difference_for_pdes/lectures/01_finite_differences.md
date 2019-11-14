@@ -123,6 +123,7 @@ $$\frac{u_{i+1} - 2u_i + 0}{h^2} = 0$$
   equations in matrix format:
 
 $$
+\frac{1}{h^2}
 \begin{bmatrix} -2      & 1      &         &   &     \\
  1      & -2     & 1       &       & \\
 &\ddots & \ddots  &  \ddots &\\
@@ -152,6 +153,7 @@ $$u(1) = 0$$
 - Can represent this using an additive vector:
 
 $$
+\frac{1}{h^2}
 \begin{bmatrix} -2      & 1      &         &  &      \\
  1      & -2     & 1       &      &  \\
 &\ddots & \ddots  &  \ddots &\\
@@ -163,6 +165,7 @@ u_2    \\
 u_{N-1}\\
 u_{N}  \end{bmatrix}
 +
+\frac{1}{h^2}
 \begin{bmatrix} 1    \\
 0    \\
 \vdots \\
@@ -196,6 +199,7 @@ $$\frac{u_{i+1} - 2u_i + u_{i}}{h^2} = 0$$
 - And the equations become:
 
 $$
+\frac{1}{h^2}
 \begin{bmatrix} -1      & 1      &         &    &   \\
  1      & -2     & 1       &      & \\
 &\ddots & \ddots  &  \ddots &\\
@@ -247,6 +251,7 @@ u_{i,j-1}}{h^2}= 0 \text{ for } i = 1...N, j=1...N$$
   following equation (with homogenous Dirichlet bcs)
 
 \begin{equation*}
+\frac{1}{h^2}
 \left[\begin{array}{@{}cccc|cccc@{}}
 -4 & 1 &         &        &  1   &      &        &  \\
 1  & -4& 1       &        &      & 1    &        &  \\
@@ -279,16 +284,24 @@ u_{N,2}  \end{array}\right]
 0   \end{array}\right]
 \end{equation*}
 
-# Kronicker product
+# Kronecker product
 
-- This matrix $A_{2D}$ is acutally the sum of two terms, one associated with the 
-  discretisation of $u_{xx}$ given by $A_x$, and the other associated with the 
-  discretisation of $u_{yy}$ given by $A_y$
-- We can use the Kronecker (tensor) product to construct $A_{2D}$
+- This matrix $L_{2D}$ is actually the sum of two terms, one associated with the 
+  discretisation of $u_{xx}$ given by $L_x$, and the other associated with the 
+  discretisation of $u_{yy}$ given by $L_y$
+- We can use the Kronecker (tensor) product to construct $L_{2D}$
 
-$$A_{2D} = (I_y \otimes A_x) + (A_y \otimes I_x)$$
+$$L_{2D} = (I_y \otimes L_x) + (L_y \otimes I_x)$$
 
-- Where the Kronecker product $C = A \otimes B$ is given by
+- Where the Kronecker product $A \otimes B$ is given by the block matrix equation (see 
+  `numpy.kron` 
+  ([docs](https://docs.scipy.org/doc/numpy/reference/generated/numpy.kron.html))
+
+$$A \otimes B = \begin{bmatrix} a_{11} B & \hdots & a_{1n} B \\
+                                \vdots   & \ddots & \vdots   \\
+                                a_{m1} B & \hdots & a_{mn} B \end{bmatrix}$$
+
+- 
 
 
 # Solving linear systems
